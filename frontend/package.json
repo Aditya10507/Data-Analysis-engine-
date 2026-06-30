@@ -1,0 +1,46 @@
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "e2e": "playwright test",
+    "typecheck:e2e": "tsc -p tsconfig.playwright.json",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tanstack/react-table": "8.21.3",
+    "@tanstack/react-virtual": "3.14.4",
+    "axios": "1.7.9",
+    "chart.js": "4.5.1",
+    "d3": "7.9.0",
+    "lucide-react": "0.468.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-error-boundary": "^6.1.2",
+    "zod": "3.24.1",
+    "zustand": "5.0.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.17.0",
+    "@playwright/test": "^1.49.1",
+    "@types/node": "^22.10.2",
+    "@types/d3": "7.4.3",
+    "@types/react": "19.0.2",
+    "@types/react-dom": "19.0.2",
+    "@vitejs/plugin-react": "4.3.4",
+    "autoprefixer": "10.4.20",
+    "eslint": "9.39.4",
+    "eslint-plugin-react-hooks": "5.1.0",
+    "eslint-plugin-react-refresh": "0.4.16",
+    "globals": "15.14.0",
+    "postcss": "8.5.15",
+    "tailwindcss": "3.4.17",
+    "typescript": "5.7.2",
+    "typescript-eslint": "8.18.2",
+    "vite": "6.4.3"
+  }
+}

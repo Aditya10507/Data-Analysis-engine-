@@ -1,0 +1,5 @@
+region,revenue,units,created_at
+North,1200,10,2026-01-01
+South,900,8,2026-01-02
+West,1500,12,2026-01-03
+East,700,6,2026-01-04

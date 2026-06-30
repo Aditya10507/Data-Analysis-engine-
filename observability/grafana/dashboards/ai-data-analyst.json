@@ -1,0 +1,58 @@
+{
+  "title": "AI Data Analyst Observability",
+  "uid": "ai-data-analyst",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {"from": "now-1h", "to": "now"},
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Requests/min",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "Loki"},
+          "expr": "sum(count_over_time({compose_service=\"backend\"} | json | event=\"http_request\" [1m]))"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Error Rate",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "Loki"},
+          "expr": "sum(rate({compose_service=\"backend\"} | json | event=\"http_request\" | status_code >= 500 [5m]))"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Job Throughput",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "Loki"},
+          "expr": "sum(count_over_time({compose_service=\"celery-worker\"} | json | event=\"job_state_transition\" | to_status=\"done\" [5m]))"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Grok API Latency",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "Loki"},
+          "expr": "quantile_over_time(0.95, {compose_service=~\"backend|celery-worker\"} | json | event=\"grok_api_call\" | unwrap latency_ms [5m])"
+        }
+      ]
+    }
+  ]
+}

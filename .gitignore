@@ -1,0 +1,15 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+node_modules/
+dist/
+.vite/
+.DS_Store
+coverage/
+*.tsbuildinfo
+.codex-logs/
+.coverage
+test-results/
+playwright-report/
