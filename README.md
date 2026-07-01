@@ -142,7 +142,7 @@ make test
 - If insights fall back, confirm `GROQ_API_KEY` is valid and containers were recreated.
 - If login says session expired, clear browser local storage and reload.
 - If Docker env changes are not picked up, run `docker compose up -d --force-recreate backend celery-worker`.
-- Supported upload types are CSV, JSON, TSV, and TXT. Convert XLSX to CSV first.
+- Supported upload types are CSV, JSON, TSV, TXT, XLS, and XLSX.
 
 ## Deployment
 

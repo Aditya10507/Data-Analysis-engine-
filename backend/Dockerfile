@@ -16,7 +16,10 @@ RUN apt-get update \
         libpango-1.0-0 \
         libpangoft2-1.0-0 \
     && rm -rf /var/lib/apt/lists/*
+
 RUN pip install --no-cache-dir -r requirements.txt
+COPY backend/requirements-files.txt .
+RUN pip install --no-cache-dir --retries 10 --timeout 600 -r requirements-files.txt
 
 COPY backend/ .
 

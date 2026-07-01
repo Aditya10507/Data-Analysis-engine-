@@ -1,28 +1,53 @@
 import csv
 import json
-from io import StringIO
+from io import BytesIO, StringIO
+
+import pandas as pd
 
 from app.models.file_preview import ColumnType, ParsedFilePreview, PreviewCellValue, PreviewColumn
 
 MAX_PREVIEW_ROWS = 10000
 DEFAULT_TEXT_COLUMN = "value"
+SPREADSHEET_EXTENSIONS = (".xls", ".xlsx")
 
 
 def parse_file_preview(file_name: str, file_bytes: bytes) -> ParsedFilePreview:
     """Parse uploaded bytes and return a typed preview payload."""
+    lower_name = file_name.lower()
+
+    if lower_name.endswith(SPREADSHEET_EXTENSIONS):
+        rows = parse_dataframe_rows(pd.read_excel(BytesIO(file_bytes)))
+    else:
+        rows = parse_text_preview_rows(lower_name, file_bytes)
+
+    columns = infer_columns(rows)
+    return ParsedFilePreview(columns=columns, rows=rows[:MAX_PREVIEW_ROWS])
+
+
+def parse_text_preview_rows(file_name: str, file_bytes: bytes) -> list[dict[str, PreviewCellValue]]:
+    """Parse text-like upload bytes and return preview rows."""
     file_text = file_bytes.decode("utf-8-sig")
 
-    if file_name.lower().endswith(".json"):
+    if file_name.endswith(".json"):
         rows = parse_json_rows(file_text)
-    elif file_name.lower().endswith(".tsv"):
+    elif file_name.endswith(".tsv"):
         rows = parse_delimited_rows(file_text, "\t")
-    elif file_name.lower().endswith(".csv"):
+    elif file_name.endswith(".csv"):
         rows = parse_delimited_rows(file_text, ",")
     else:
         rows = parse_text_rows(file_text)
 
-    columns = infer_columns(rows)
-    return ParsedFilePreview(columns=columns, rows=rows[:MAX_PREVIEW_ROWS])
+    return rows
+
+
+def parse_dataframe_rows(dataframe: pd.DataFrame) -> list[dict[str, PreviewCellValue]]:
+    """Convert a DataFrame to preview row dictionaries."""
+    preview_frame = dataframe.head(MAX_PREVIEW_ROWS)
+    cleaned_frame = preview_frame.astype(object).where(pd.notna(preview_frame), None)
+    return [
+        {str(key): normalize_cell(value) for key, value in row.items()}
+        for row in cleaned_frame.to_dict("records")
+    ]
 
 
 def parse_delimited_rows(file_text: str, delimiter: str) -> list[dict[str, PreviewCellValue]]:

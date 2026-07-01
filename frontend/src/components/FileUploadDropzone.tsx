@@ -4,7 +4,7 @@ import { useFileUpload, type FileUploadController } from "../hooks/useFileUpload
 import { useAppStore } from "../store/appStore";
 import { ShowJobFailurePanel } from "./JobFailurePanel";
 import { ShowUploadErrorMessage } from "./UploadErrorMessage";
-const ACCEPTED_FILE_TYPES = ".csv,.json,.tsv,.txt";
+const ACCEPTED_FILE_TYPES = ".csv,.json,.tsv,.txt,.xls,.xlsx";
 const MAX_PROGRESS_VALUE = 100;
 const STEP_LABELS = ["Uploading", "Queued", "Processing", "Done"];
 const ACTIVE_STATUSES = new Set(["uploading", "queued", "processing"]);
@@ -25,7 +25,7 @@ function renderMetadata(upload: FileUploadController): ReactElement {
 
   return (
     <span>
-      {upload.filePreview.sizeLabel} / {upload.filePreview.rowCount} preview rows
+      {upload.filePreview.sizeLabel} / {upload.filePreview.rowCount ?? "server"} preview rows
     </span>
   );
 }
@@ -122,7 +122,7 @@ function renderDropZone(upload: FileUploadController): ReactElement {
       />
       <FileText className="mx-auto h-10 w-10 text-slate-400" aria-hidden="true" />
       <p className="mt-3 text-sm font-medium text-slate-700 dark:text-slate-200">
-        {upload.filePreview?.name ?? "Drop a CSV, JSON, TSV, or TXT file"}
+        {upload.filePreview?.name ?? "Drop CSV, JSON, TSV, TXT, or Excel"}
       </p>
       <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
         {renderMetadata(upload)}

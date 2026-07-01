@@ -8,6 +8,8 @@ CSV_EXTENSION = ".csv"
 JSON_EXTENSION = ".json"
 TSV_EXTENSION = ".tsv"
 TXT_EXTENSION = ".txt"
+XLS_EXTENSION = ".xls"
+XLSX_EXTENSION = ".xlsx"
 TEXT_ENCODING = "utf-8"
 
 
@@ -26,6 +28,8 @@ def get_parser(extension: str) -> Callable[[bytes], pd.DataFrame]:
         JSON_EXTENSION: parse_json_bytes,
         TSV_EXTENSION: parse_tsv_bytes,
         TXT_EXTENSION: parse_text_bytes,
+        XLS_EXTENSION: parse_excel_bytes,
+        XLSX_EXTENSION: parse_excel_bytes,
     }
 
     if extension not in parsers:
@@ -47,6 +51,11 @@ def parse_tsv_bytes(file_bytes: bytes) -> pd.DataFrame:
 def parse_json_bytes(file_bytes: bytes) -> pd.DataFrame:
     """Parse JSON bytes and return a DataFrame."""
     return pd.read_json(BytesIO(file_bytes))
+
+
+def parse_excel_bytes(file_bytes: bytes) -> pd.DataFrame:
+    """Parse Excel workbook bytes and return a DataFrame."""
+    return pd.read_excel(BytesIO(file_bytes))
 
 
 def parse_text_bytes(file_bytes: bytes) -> pd.DataFrame:

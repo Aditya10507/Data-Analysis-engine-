@@ -20,7 +20,7 @@ export type ParsedFilePreview = {
 export type FilePreview = {
   name: string;
   sizeLabel: string;
-  rowCount: number;
+  rowCount: number | null;
 };
 
 export type UploadJob = {

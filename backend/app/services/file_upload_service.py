@@ -10,7 +10,8 @@ from app.models.user_repository import ensure_user_record
 from app.services.storage_service import save_raw_file
 from app.tasks.file_tasks import process_file
 
-ALLOWED_EXTENSIONS = {".csv", ".json", ".tsv", ".txt"}
+ALLOWED_EXTENSIONS = {".csv", ".json", ".tsv", ".txt", ".xls", ".xlsx"}
+ALLOWED_FORMATS_LABEL = "CSV, JSON, TSV, TXT, XLS, or XLSX"
 MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024
 QUEUED_STATUS = "queued"
 SYSTEM_USER_ID = "00000000-0000-0000-0000-000000000001"
@@ -32,7 +33,7 @@ def validate_upload(uploaded_file: UploadFile, file_bytes: bytes) -> str:
         raise ValueError("Uploaded file must be 50 MB or smaller.")
 
     if not has_allowed_extension(filename):
-        raise ValueError("Uploaded file must be CSV, JSON, TSV, or TXT.")
+        raise ValueError(f"Uploaded file must be {ALLOWED_FORMATS_LABEL}.")
 
     return filename
 
