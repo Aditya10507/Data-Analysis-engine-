@@ -1,33 +1,52 @@
-import { useState } from "react";
-import type { AnalysisResult } from "../types/analysis";
+import { useState, type Dispatch, type SetStateAction } from "react";
+import { askReportAssistant } from "../api/reportAssistantApi";
 import type { AssistantMessage } from "../types/assistant";
-import type { JobResult } from "../types/files";
-import { buildReportAnswer } from "../utils/reportAssistant";
 
 const WELCOME_MESSAGE = "Ask me about this report: missing values, duplicates, columns, charts, or recommendations.";
 
 type ReportAssistantInput = {
-  analysisResult: AnalysisResult;
-  jobResult: JobResult | null;
+  jobId: string;
 };
 
 /** Manage and return report assistant chat state. */
 export function useReportAssistant(input: ReportAssistantInput) {
   const [draft, setDraft] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<AssistantMessage[]>([buildAssistantMessage(WELCOME_MESSAGE)]);
 
-  function submitQuestion(): void {
+  async function submitQuestion(): Promise<void> {
     const question = draft.trim();
     if (!question) {
       return;
     }
 
-    const answer = buildReportAnswer({ ...input, question });
-    setMessages((items) => [...items, buildUserMessage(question), buildAssistantMessage(answer)]);
+    setMessages((items) => [...items, buildUserMessage(question)]);
     setDraft("");
+    await requestAssistantAnswer(input.jobId, question, setMessages, setErrorMessage, setIsLoading);
   }
 
-  return { draft, messages, setDraft, submitQuestion };
+  return { draft, errorMessage, isLoading, messages, setDraft, submitQuestion };
+}
+
+/** Request and append an assistant answer. */
+async function requestAssistantAnswer(
+  jobId: string,
+  question: string,
+  setMessages: Dispatch<SetStateAction<AssistantMessage[]>>,
+  setErrorMessage: Dispatch<SetStateAction<string | null>>,
+  setIsLoading: Dispatch<SetStateAction<boolean>>,
+): Promise<void> {
+  try {
+    setErrorMessage(null);
+    setIsLoading(true);
+    const envelope = await askReportAssistant(jobId, question);
+    setMessages((items) => [...items, buildAssistantMessage(envelope.data?.answer ?? "No answer returned.")]);
+  } catch (error) {
+    setErrorMessage(error instanceof Error ? error.message : "Report assistant failed.");
+  } finally {
+    setIsLoading(false);
+  }
 }
 
 /** Build and return an assistant message. */

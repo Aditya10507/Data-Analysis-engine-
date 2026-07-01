@@ -1,5 +1,6 @@
 import { useAppStore } from "../store/appStore";
 import type { AppView } from "../types/app";
+import { ShowReportAssistantCard } from "./ReportAssistantCard";
 import { ShowRecentDownloads } from "./RecentDownloads";
 
 type NavItem = {
@@ -24,6 +25,7 @@ function buildNavClass(isActive: boolean): string {
 /** Show and return the application sidebar navigation. */
 export function ShowSidebarNav() {
   const activeView = useAppStore((state) => state.activeView);
+  const jobResult = useAppStore((state) => state.jobResult);
   const setActiveView = useAppStore((state) => state.setActiveView);
 
   return (
@@ -49,6 +51,7 @@ export function ShowSidebarNav() {
         ))}
       </nav>
       <ShowRecentDownloads />
+      {activeView === "dashboard" && jobResult ? <ShowReportAssistantCard jobResult={jobResult} /> : null}
     </aside>
   );
 }

@@ -30,6 +30,6 @@ export function calculateDuplicateRowPercent(rows: PreviewRow[]): number {
 }
 
 /** Build and return a concise dashboard summary. */
-export function buildSummary(preview: ParsedFilePreview): string {
-  return `${preview.rows.length} rows across ${preview.columns.length} columns are ready for analysis.`;
+export function buildSummary(rowCount: number, columnCount: number, previewCount: number): string {
+  return `${rowCount.toLocaleString()} rows across ${columnCount} columns are ready. Charts use ${previewCount.toLocaleString()} preview rows.`;
 }

@@ -21,7 +21,7 @@ function renderHeatmap(svgElement: SVGSVGElement, cells: CorrelationCell[], labe
   const colorScale = d3.scaleSequential(d3.interpolateRdBu).domain([1, -1]);
   const svg = d3.select(svgElement);
   svg.selectAll("*").remove();
-  svg.attr("viewBox", `0 0 ${width} ${width}`);
+  svg.attr("height", width).attr("viewBox", `0 0 ${width} ${width}`).attr("width", width);
   svg.selectAll("rect").data(cells).join("rect")
     .attr("x", (cell) => LABEL_OFFSET + labels.indexOf(cell.xColumn) * CELL_SIZE)
     .attr("y", (cell) => LABEL_OFFSET + labels.indexOf(cell.yColumn) * CELL_SIZE)
@@ -52,7 +52,7 @@ export function ShowCorrelationHeatmap({ cells }: CorrelationHeatmapProps) {
 
   return (
     <div className="max-h-[560px] overflow-auto rounded-lg border border-violet-100 bg-violet-50/40 p-4 dark:border-slate-800 dark:bg-slate-950">
-      <svg ref={svgRef} className="min-w-[520px] text-xs text-slate-600 dark:text-slate-300" />
+      <svg ref={svgRef} className="text-xs text-slate-600 dark:text-slate-300" />
     </div>
   );
 }

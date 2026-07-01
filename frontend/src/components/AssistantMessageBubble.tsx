@@ -12,9 +12,9 @@ export function ShowAssistantMessageBubble({ message }: AssistantMessageBubblePr
 
   return (
     <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
-      <div className={`flex max-w-[85%] gap-3 rounded-lg px-4 py-3 ${buildBubbleClass(isUser)}`}>
+      <div className={`flex max-w-[92%] gap-2 rounded-lg px-3 py-2 ${buildBubbleClass(isUser)}`}>
         <Icon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-        <p className="whitespace-pre-line text-sm leading-6">{message.content}</p>
+        <p className="whitespace-pre-line text-xs leading-5">{message.content}</p>
       </div>
     </div>
   );

@@ -22,7 +22,10 @@ export function buildPreviewFromJobResult(jobResult: JobResult): ParsedFilePrevi
 
 /** Build and return dashboard analysis data from a completed job result. */
 export function buildAnalysisFromJobResult(jobResult: JobResult) {
-  return buildAnalysisResult(buildPreviewFromJobResult(jobResult));
+  return buildAnalysisResult(buildPreviewFromJobResult(jobResult), {
+    columnCount: jobResult.shape[1],
+    rowCount: jobResult.shape[0],
+  });
 }
 
 /** Build and return preview columns from result metadata. */

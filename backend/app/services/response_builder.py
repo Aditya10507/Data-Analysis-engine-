@@ -10,7 +10,7 @@ from app.services.storage_service import (
 )
 
 DOWNLOAD_EXPIRY_SECONDS = 60 * 60
-PREVIEW_ROW_LIMIT = 100
+PREVIEW_ROW_LIMIT = 10000
 
 
 def build_job_response(

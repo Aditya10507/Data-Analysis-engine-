@@ -5,7 +5,6 @@ import { ShowDashboardKpis } from "../components/DashboardKpis";
 import { ShowDashboardEmptyState } from "../components/DashboardEmptyState";
 import { ShowDashboardExportControls } from "../components/DashboardExportControls";
 import { ShowHealthStatusPanel } from "../components/HealthStatusPanel";
-import { ShowReportAssistantCard } from "../components/ReportAssistantCard";
 import { useFetchHealthStatus } from "../hooks/useHealthStatus";
 import { useAppStore } from "../store/appStore";
 
@@ -14,7 +13,6 @@ export function DisplayDashboardPage() {
   const healthState = useFetchHealthStatus();
   const analysisResult = useAppStore((state) => state.analysisResult);
   const parsedPreview = useAppStore((state) => state.parsedPreview);
-  const jobResult = useAppStore((state) => state.jobResult);
   const setActiveView = useAppStore((state) => state.setActiveView);
 
   return (
@@ -25,7 +23,6 @@ export function DisplayDashboardPage() {
       {analysisResult ? <ShowDashboardExportControls /> : null}
       {analysisResult ? <ShowChartPanel analysisResult={analysisResult} /> : null}
       {analysisResult ? <ShowAiInsightsPanel /> : null}
-      {analysisResult ? <ShowReportAssistantCard analysisResult={analysisResult} jobResult={jobResult} /> : null}
       {analysisResult ? <p className="text-sm text-slate-500 dark:text-slate-400">{analysisResult.summary}</p> : null}
       {parsedPreview ? <ShowDataPreviewTable preview={parsedPreview} /> : null}
     </section>

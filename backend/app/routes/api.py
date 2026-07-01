@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.routes.analysis import router as analysis_router
+from app.routes.assistant import router as assistant_router
 from app.routes.files import router as files_router
 from app.routes.insights import router as insights_router
 from app.routes.job_exports import router as job_exports_router
@@ -14,3 +15,4 @@ router.include_router(jobs_router)
 router.include_router(job_exports_router)
 router.include_router(analysis_router)
 router.include_router(insights_router)
+router.include_router(assistant_router)
