@@ -4,11 +4,12 @@ import { useEffect, useRef } from "react";
 Chart.register(...registerables);
 
 type ChartCanvasProps = {
+  className?: string;
   config: ChartConfiguration;
 };
 
 /** Show and return a Chart.js canvas. */
-export function ShowChartCanvas({ config }: ChartCanvasProps) {
+export function ShowChartCanvas({ className = "h-80 w-full", config }: ChartCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -20,5 +21,5 @@ export function ShowChartCanvas({ config }: ChartCanvasProps) {
     return () => chart.destroy();
   }, [config]);
 
-  return <canvas ref={canvasRef} className="h-80 w-full" />;
+  return <canvas ref={canvasRef} className={className} />;
 }

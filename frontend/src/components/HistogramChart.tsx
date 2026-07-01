@@ -7,14 +7,16 @@ type HistogramChartProps = {
   series: HistogramSeries[];
 };
 
+const CHART_COLORS = ["#2563eb", "#16a34a", "#f97316", "#7c3aed", "#dc2626"];
+
 /** Build and return a bar chart config for one histogram. */
-function buildConfig(series: HistogramSeries): ChartConfiguration {
+function buildConfig(series: HistogramSeries, index: number): ChartConfiguration {
   return {
     data: {
-      datasets: [{ backgroundColor: "#0f172a", data: series.values, label: series.columnName }],
+      datasets: [{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length], data: series.values, label: series.columnName }],
       labels: series.labels,
     },
-    options: { maintainAspectRatio: false, responsive: true },
+    options: { maintainAspectRatio: false, responsive: true, scales: { y: { beginAtZero: true } } },
     type: "bar",
   };
 }
@@ -28,9 +30,9 @@ export function ShowHistogramChart({ series }: HistogramChartProps) {
   }
 
   return (
-    <div className="grid gap-5 lg:grid-cols-2">
+    <div className="grid min-w-[760px] gap-5 lg:grid-cols-2">
       {configs.map((config, index) => (
-        <div key={series[index].columnName} className="h-80 rounded-lg border border-slate-200 p-4 dark:border-slate-800">
+        <div key={series[index].columnName} className="h-80 rounded-lg border border-blue-100 bg-blue-50/40 p-4 dark:border-slate-800 dark:bg-slate-950">
           <ShowChartCanvas config={config} />
         </div>
       ))}

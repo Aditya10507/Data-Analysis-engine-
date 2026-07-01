@@ -7,6 +7,7 @@ import { streamApi } from "./streamClient";
 import { getAccessToken } from "./tokenStorage";
 
 type RetriableRequestConfig = InternalAxiosRequestConfig & { hasRetried?: boolean };
+type UploadProgressHandler = (loadedBytes: number, totalBytes: number) => void;
 
 export { apiClient, refreshTokenRequest, streamApi };
 
@@ -24,7 +25,7 @@ apiClient.interceptors.response.use(
 );
 
 /** Request the API and return a schema-validated response envelope. */
-export async function requestApi<TData>(path: string, schema: z.ZodType<TData>): Promise<TData> {
+export async function requestApi<TData>(path: string, schema: z.ZodType<TData, z.ZodTypeDef, unknown>): Promise<TData> {
   const response = await apiClient.get(path);
   return schema.parse(response.data);
 }
@@ -33,9 +34,16 @@ export async function requestApi<TData>(path: string, schema: z.ZodType<TData>):
 export async function postMultipartApi<TData>(
   path: string,
   formData: FormData,
-  schema: z.ZodType<TData>,
+  schema: z.ZodType<TData, z.ZodTypeDef, unknown>,
+  onProgress?: UploadProgressHandler,
 ): Promise<TData> {
-  const response = await apiClient.post(path, formData);
+  const response = await apiClient.post(path, formData, {
+    onUploadProgress: (event) => {
+      if (event.total && onProgress) {
+        onProgress(event.loaded, event.total);
+      }
+    },
+  });
   return schema.parse(response.data);
 }
 
@@ -43,7 +51,7 @@ export async function postMultipartApi<TData>(
 export async function postPublicApi<TData, TBody>(
   path: string,
   body: TBody,
-  schema: z.ZodType<TData>,
+  schema: z.ZodType<TData, z.ZodTypeDef, unknown>,
 ): Promise<TData> {
   const response = await publicApiClient.post(path, body);
   return schema.parse(response.data);

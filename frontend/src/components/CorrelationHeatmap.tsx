@@ -51,7 +51,7 @@ export function ShowCorrelationHeatmap({ cells }: CorrelationHeatmapProps) {
   }
 
   return (
-    <div className="overflow-auto rounded-lg border border-slate-200 p-4 dark:border-slate-800">
+    <div className="max-h-[560px] overflow-auto rounded-lg border border-violet-100 bg-violet-50/40 p-4 dark:border-slate-800 dark:bg-slate-950">
       <svg ref={svgRef} className="min-w-[520px] text-xs text-slate-600 dark:text-slate-300" />
     </div>
   );

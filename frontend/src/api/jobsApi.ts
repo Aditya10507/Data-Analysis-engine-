@@ -28,7 +28,7 @@ export async function fetchJobHistory(
 ): Promise<ApiEnvelope<JobHistoryResult>> {
   try {
     const params = buildHistoryParams(limit, offset, filters);
-    return await requestApi(`${JOB_HISTORY_PATH}?${params}`, jobHistoryEnvelopeSchema);
+    return await requestApi<ApiEnvelope<JobHistoryResult>>(`${JOB_HISTORY_PATH}?${params}`, jobHistoryEnvelopeSchema);
   } catch (error) {
     if (error instanceof Error) {
       throw error;

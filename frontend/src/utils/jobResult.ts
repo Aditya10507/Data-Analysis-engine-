@@ -8,7 +8,8 @@ export function parseJobResult(resultJson: Record<string, unknown> | null): JobR
     return null;
   }
 
-  return jobResultSchema.parse(resultJson);
+  const result = jobResultSchema.safeParse(resultJson);
+  return result.success ? result.data : null;
 }
 
 /** Build and return frontend preview data from a completed job result. */

@@ -7,18 +7,20 @@ type TrendLineChartProps = {
   series: TrendSeries[];
 };
 
+const LINE_COLORS = ["#2563eb", "#16a34a", "#f97316", "#7c3aed", "#dc2626"];
+
 /** Build and return a line chart config for numeric trends. */
 function buildConfig(series: TrendSeries[]): ChartConfiguration {
   return {
     data: {
-      datasets: series.map((item) => ({
-        borderColor: "#0f172a",
+      datasets: series.map((item, index) => ({
+        borderColor: LINE_COLORS[index % LINE_COLORS.length],
         data: item.points,
         label: item.columnName,
         tension: 0.25,
       })),
     },
-    options: { maintainAspectRatio: false, parsing: false, responsive: true },
+    options: { maintainAspectRatio: false, parsing: false, responsive: true, scales: { y: { beginAtZero: false } } },
     type: "line",
   };
 }
@@ -32,7 +34,7 @@ export function ShowTrendLineChart({ series }: TrendLineChartProps) {
   }
 
   return (
-    <div className="h-96 rounded-lg border border-slate-200 p-4 dark:border-slate-800">
+    <div className="h-96 min-w-[820px] rounded-lg border border-emerald-100 bg-emerald-50/40 p-4 dark:border-slate-800 dark:bg-slate-950">
       <ShowChartCanvas config={config} />
     </div>
   );

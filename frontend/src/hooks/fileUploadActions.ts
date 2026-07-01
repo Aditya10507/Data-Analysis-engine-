@@ -45,7 +45,7 @@ export const INITIAL_UPLOAD_STATE: FileUploadState = {
 
 export const PROGRESS_BY_STATUS: Record<AnalysisStatus, number> = {
   idle: 0,
-  uploading: 25,
+  uploading: 15,
   queued: 50,
   processing: 75,
   done: 100,
@@ -123,7 +123,7 @@ async function startUpload(
     actions.setStatus("uploading");
     actions.setJobErrorMessage(null);
     actions.setJobResult(null);
-    const envelope = await uploadFile(actions.uploadedFile);
+    const envelope = await uploadFile(actions.uploadedFile, buildProgressHandler(setUploadState));
     actions.setJobId(envelope.data?.job_id ?? null);
     actions.setStatus(envelope.data?.status ?? "failed");
   } catch (error) {
@@ -132,6 +132,15 @@ async function startUpload(
     actions.setJobErrorMessage(errorMessage);
     setUploadState((state) => ({ ...state, errorMessage }));
   }
+}
+
+/** Build and return a real upload progress handler. */
+function buildProgressHandler(setUploadState: Dispatch<SetStateAction<FileUploadState>>) {
+  return (loadedBytes: number, totalBytes: number) => {
+    const ratio = totalBytes > 0 ? loadedBytes / totalBytes : 0;
+    const progress = Math.min(45, Math.max(15, Math.round(ratio * 45)));
+    setUploadState((state) => ({ ...state, progress }));
+  };
 }
 
 /** Read and return a formatted job error when the job failed. */
