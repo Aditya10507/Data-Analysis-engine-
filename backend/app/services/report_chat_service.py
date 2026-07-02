@@ -13,8 +13,10 @@ from app.services.report_chat_context_service import build_report_chat_context
 MAX_CHAT_TOKENS = 500
 REQUEST_TIMEOUT_SECONDS = 30
 REPORT_KEYWORDS = {
+    "action", "anomalies", "anomaly",
     "chart", "column", "correlation", "dashboard", "data", "duplicate", "graph",
-    "insight", "missing", "null", "report", "row", "trend", "value",
+    "explain", "insight", "missing", "next", "null", "recommend", "report",
+    "risk", "row", "trend", "value",
 }
 OFF_TOPIC_ANSWER = "I can only answer questions about the charts and report produced for this dataset."
 

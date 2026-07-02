@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { AnalysisResult } from "../types/analysis";
+import { ShowChartAiActions } from "./ChartAiActions";
 import { ShowCorrelationHeatmap } from "./CorrelationHeatmap";
 import { ShowHistogramChart } from "./HistogramChart";
 import { ShowMissingValuesChart } from "./MissingValuesChart";
@@ -9,6 +10,7 @@ type ChartTab = "distribution" | "correlation" | "trends" | "missing";
 
 type ChartPanelProps = {
   analysisResult: AnalysisResult;
+  jobId: string | null;
 };
 
 const CHART_TABS: { label: string; value: ChartTab }[] = [
@@ -42,8 +44,9 @@ function renderChart(activeTab: ChartTab, analysisResult: AnalysisResult) {
 }
 
 /** Show and return the responsive dashboard chart panel. */
-export function ShowChartPanel({ analysisResult }: ChartPanelProps) {
+export function ShowChartPanel({ analysisResult, jobId }: ChartPanelProps) {
   const [activeTab, setActiveTab] = useState<ChartTab>("distribution");
+  const activeLabel = CHART_TABS.find((tab) => tab.value === activeTab)?.label ?? "chart";
 
   return (
     <section className="rounded-lg border border-blue-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -58,6 +61,9 @@ export function ShowChartPanel({ analysisResult }: ChartPanelProps) {
             {tab.label}
           </button>
         ))}
+      </div>
+      <div className="mt-5">
+        <ShowChartAiActions chartLabel={activeLabel} jobId={jobId} />
       </div>
       <div className="mt-5 max-h-[680px] overflow-auto pr-2">{renderChart(activeTab, analysisResult)}</div>
     </section>

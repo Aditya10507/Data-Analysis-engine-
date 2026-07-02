@@ -4,9 +4,8 @@ import { useFileUpload, type FileUploadController } from "../hooks/useFileUpload
 import { useAppStore } from "../store/appStore";
 import { ShowJobFailurePanel } from "./JobFailurePanel";
 import { ShowUploadErrorMessage } from "./UploadErrorMessage";
+import { ShowUploadPipelineSteps } from "./UploadPipelineSteps";
 const ACCEPTED_FILE_TYPES = ".csv,.json,.tsv,.txt,.xls,.xlsx";
-const MAX_PROGRESS_VALUE = 100;
-const STEP_LABELS = ["Uploading", "Queued", "Processing", "Done"];
 const ACTIVE_STATUSES = new Set(["uploading", "queued", "processing"]);
 
 /** Build and return a drop zone class name. */
@@ -37,18 +36,7 @@ function renderProgress(upload: FileUploadController): ReactElement | null {
   }
 
   return (
-    <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-800">
-      <progress
-        className="h-2 w-full overflow-hidden rounded-full accent-slate-950 dark:accent-white"
-        max={MAX_PROGRESS_VALUE}
-        value={upload.progress}
-      />
-      <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
-        {STEP_LABELS.map((label) => (
-          <span key={label}>{label}</span>
-        ))}
-      </div>
-    </div>
+    <ShowUploadPipelineSteps progress={upload.progress} status={upload.status} />
   );
 }
 
