@@ -30,7 +30,12 @@ def answer_report_question(result_json: dict[str, Any], question: str) -> Report
 
     settings = get_settings()
     context = build_report_chat_context(result_json)
-    answer = call_groq_report_chat(context, question, settings)
+    try:
+        answer = call_groq_report_chat(context, question, settings)
+    except (httpx.HTTPError, ValueError) as error:
+        logger.warning("report_chat_fallback_used", error=str(error))
+        answer = build_fallback_report_answer(context, question)
+
     return ReportChatResult(answer=answer)
 
 
@@ -88,6 +93,61 @@ def build_user_message(context: dict[str, Any], question: str) -> str:
 def parse_chat_answer(response_json: dict[str, Any]) -> str:
     """Parse and return the assistant answer text."""
     return str(response_json["choices"][0]["message"]["content"]).strip()
+
+
+def build_fallback_report_answer(context: dict[str, Any], question: str) -> str:
+    """Build and return a report-grounded fallback answer."""
+    lowered_question = question.lower()
+    shape = context.get("shape", [0, 0])
+    if "correlation" in lowered_question:
+        return build_correlation_fallback(context, shape)
+
+    if "missing" in lowered_question or "null" in lowered_question:
+        return build_missing_fallback(context, shape)
+
+    if "trend" in lowered_question:
+        return build_trend_fallback(context, shape)
+
+    return build_general_fallback(context, shape)
+
+
+def build_correlation_fallback(context: dict[str, Any], shape: Any) -> str:
+    """Build and return a correlation chart fallback answer."""
+    columns = context.get("charts", {}).get("histogram_columns", [])
+    return (
+        f"This correlation view compares numeric relationships across {shape[1]} columns. "
+        f"Start with the strongest red or blue cells, then validate whether those fields are business-related. "
+        f"Numeric columns detected include: {', '.join(columns[:6]) or 'not available'}."
+    )
+
+
+def build_missing_fallback(context: dict[str, Any], shape: Any) -> str:
+    """Build and return a missing-values fallback answer."""
+    null_percent = context.get("stats", {}).get("null_percent")
+    return (
+        f"The missing-values chart helps judge data reliability across {shape[0]} rows. "
+        f"Overall null percentage is {null_percent if null_percent is not None else 'not available'}. "
+        "Prioritize columns with the tallest bars before trusting KPIs or AI insights."
+    )
+
+
+def build_trend_fallback(context: dict[str, Any], shape: Any) -> str:
+    """Build and return a trend chart fallback answer."""
+    return (
+        f"The trend chart shows numeric movement across the row order for {shape[0]} records. "
+        "Look for sudden jumps, flatlines, and repeated spikes because they often signal outliers, grouped records, or data-entry issues."
+    )
+
+
+def build_general_fallback(context: dict[str, Any], shape: Any) -> str:
+    """Build and return a general report fallback answer."""
+    insights = context.get("insights", [])
+    headline = insights[0].get("headline") if insights and isinstance(insights[0], dict) else None
+    return (
+        f"This report contains {shape[0]} rows and {shape[1]} columns. "
+        f"{'Top insight: ' + headline + '. ' if headline else ''}"
+        "Groq is temporarily unavailable, so this answer is generated from the saved report summary."
+    )
 
 
 def log_report_chat_call(response_json: dict[str, Any], start_time: float, is_success: bool) -> None:
