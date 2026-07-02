@@ -1,12 +1,14 @@
 import { BarChart3, LineChart, Network, SearchCheck } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
 import type { AnalysisResult } from "../types/analysis";
+import type { ChartTab } from "./ChartPanel";
 
 const MAX_RECOMMENDATIONS = 3;
 const MANY_COLUMNS_THRESHOLD = 6;
 
 type SmartChartRecommendationsProps = {
   analysisResult: AnalysisResult;
+  onSelectChart: (chartTab: ChartTab) => void;
 };
 
 type ChartRecommendation = {
@@ -14,10 +16,11 @@ type ChartRecommendation = {
   icon: ComponentType<SVGProps<SVGSVGElement>>;
   label: string;
   tone: string;
+  value: ChartTab;
 };
 
 /** Show and return smart chart recommendations. */
-export function ShowSmartChartRecommendations({ analysisResult }: SmartChartRecommendationsProps) {
+export function ShowSmartChartRecommendations({ analysisResult, onSelectChart }: SmartChartRecommendationsProps) {
   const recommendations = buildRecommendations(analysisResult).slice(0, MAX_RECOMMENDATIONS);
 
   return (
@@ -31,7 +34,7 @@ export function ShowSmartChartRecommendations({ analysisResult }: SmartChartReco
       </div>
       <div className="mt-5 grid gap-3 lg:grid-cols-3">
         {recommendations.map((recommendation) => (
-          <ShowRecommendationCard key={recommendation.label} recommendation={recommendation} />
+          <ShowRecommendationCard key={recommendation.label} onSelectChart={onSelectChart} recommendation={recommendation} />
         ))}
       </div>
     </section>
@@ -39,14 +42,15 @@ export function ShowSmartChartRecommendations({ analysisResult }: SmartChartReco
 }
 
 /** Show and return one chart recommendation. */
-function ShowRecommendationCard({ recommendation }: { recommendation: ChartRecommendation }) {
+function ShowRecommendationCard(props: { onSelectChart: (chartTab: ChartTab) => void; recommendation: ChartRecommendation }) {
+  const { onSelectChart, recommendation } = props;
   const Icon = recommendation.icon;
   return (
-    <article className={`rounded-lg border p-4 ${recommendation.tone}`}>
+    <button className={`rounded-lg border p-4 text-left transition hover:-translate-y-0.5 hover:shadow-md ${recommendation.tone}`} type="button" onClick={() => onSelectChart(recommendation.value)}>
       <Icon className="h-5 w-5" aria-hidden="true" />
       <h4 className="mt-3 font-semibold text-slate-950 dark:text-white">{recommendation.label}</h4>
       <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{recommendation.body}</p>
-    </article>
+    </button>
   );
 }
 
@@ -75,6 +79,7 @@ function buildDistributionRecommendation(analysisResult: AnalysisResult): ChartR
     icon: BarChart3,
     label: "Distribution",
     tone: "border-blue-100 bg-blue-50/60 text-blue-700 dark:border-slate-800 dark:bg-slate-950",
+    value: "distribution",
   };
 }
 
@@ -85,6 +90,7 @@ function buildMissingRecommendation(analysisResult: AnalysisResult): ChartRecomm
     icon: SearchCheck,
     label: "Missing values",
     tone: "border-orange-100 bg-orange-50/60 text-orange-700 dark:border-slate-800 dark:bg-slate-950",
+    value: "missing",
   };
 }
 
@@ -95,6 +101,7 @@ function buildCorrelationRecommendation(): ChartRecommendation {
     icon: Network,
     label: "Correlation",
     tone: "border-violet-100 bg-violet-50/60 text-violet-700 dark:border-slate-800 dark:bg-slate-950",
+    value: "correlation",
   };
 }
 
@@ -105,5 +112,6 @@ function buildTrendRecommendation(): ChartRecommendation {
     icon: LineChart,
     label: "Trends",
     tone: "border-emerald-100 bg-emerald-50/60 text-emerald-700 dark:border-slate-800 dark:bg-slate-950",
+    value: "trends",
   };
 }

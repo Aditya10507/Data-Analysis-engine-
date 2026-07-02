@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { ShowDataPreviewTable } from "../components/DataPreviewTable";
 import { ShowAiInsightsPanel } from "../components/AiInsightsPanel";
-import { ShowChartPanel } from "../components/ChartPanel";
+import { ShowChartPanel, type ChartTab } from "../components/ChartPanel";
+import { ShowColumnExplorerPanel } from "../components/ColumnExplorerPanel";
 import { ShowDashboardKpis } from "../components/DashboardKpis";
 import { ShowDashboardEmptyState } from "../components/DashboardEmptyState";
 import { ShowDashboardExportControls } from "../components/DashboardExportControls";
@@ -13,6 +15,8 @@ import { useAppStore } from "../store/appStore";
 
 /** Display and return the dashboard page shell. */
 export function DisplayDashboardPage() {
+  const [activeChart, setActiveChart] = useState<ChartTab>("distribution");
+  const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
   const healthState = useFetchHealthStatus();
   const analysisResult = useAppStore((state) => state.analysisResult);
   const jobResult = useAppStore((state) => state.jobResult);
@@ -27,8 +31,18 @@ export function DisplayDashboardPage() {
       {analysisResult ? <ShowDashboardKpis analysisResult={analysisResult} /> : null}
       {analysisResult ? <ShowDashboardExportControls /> : null}
       {analysisResult ? <ShowExecutiveSummaryPanel analysisResult={analysisResult} jobResult={jobResult} /> : null}
-      {analysisResult ? <ShowSmartChartRecommendations analysisResult={analysisResult} /> : null}
-      {analysisResult ? <ShowChartPanel analysisResult={analysisResult} jobId={jobResult?.job_id ?? null} /> : null}
+      {analysisResult ? <ShowSmartChartRecommendations analysisResult={analysisResult} onSelectChart={setActiveChart} /> : null}
+      {parsedPreview ? <ShowColumnExplorerPanel onFocusColumn={setSelectedColumn} preview={parsedPreview} selectedColumn={selectedColumn} /> : null}
+      {analysisResult ? (
+        <ShowChartPanel
+          activeTab={activeChart}
+          analysisResult={analysisResult}
+          jobId={jobResult?.job_id ?? null}
+          onActiveTabChange={setActiveChart}
+          onSelectedColumnChange={setSelectedColumn}
+          selectedColumn={selectedColumn}
+        />
+      ) : null}
       {analysisResult ? <ShowAiInsightsPanel /> : null}
       {parsedPreview ? <ShowDataPreviewTable preview={parsedPreview} /> : null}
     </section>
