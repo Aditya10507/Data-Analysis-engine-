@@ -6,7 +6,7 @@ A full-stack AI data analyst app that uploads tabular files, profiles and cleans
 
 ## Stack
 
-- Frontend: React, TypeScript, Vite, Tailwind, Zustand, TanStack Table, Chart.js, D3
+- Frontend: React, TypeScript, Vite, Tailwind, Zustand, TanStack Table, Chart.js, D3, Plotly.js
 - Backend: FastAPI, SQLAlchemy, Alembic, Celery, pandas, Plotly, Matplotlib, WeasyPrint
 - Infrastructure: PostgreSQL, Redis, MinIO, Docker Compose, Loki, Promtail, Grafana
 - AI provider: GroqCloud OpenAI-compatible Chat Completions API
@@ -24,6 +24,7 @@ flowchart LR
   celery --> worker[Celery worker x4]
   worker --> minio
   worker --> postgres
+  worker --> versions[(Report versions)]
   worker --> groq[GroqCloud API]
   worker --> charts[Plotly + Matplotlib]
   frontend --> grafana[Grafana dashboards]
@@ -31,6 +32,17 @@ flowchart LR
   api --> promtail
   worker --> promtail
 ```
+
+## Product Features
+
+- Multi-format upload: CSV, JSON, TSV, TXT, XLS, and XLSX.
+- Cleaning review before analysis: approve or skip null filling, duplicate removal, outlier clipping, and date parsing.
+- Data quality score: backend-generated score, grade, null percentage, duplicate percentage, outlier percentage, and issue list.
+- Interactive dashboard: KPI cards, virtualized preview table, 2D charts, rotatable 3D Plotly charts, D3 correlation heatmap, column drilldown, and smart chart recommendations.
+- Grounded AI analyst chat: answers questions only from the produced report, charts, stats, cleaning report, insights, and data quality score.
+- Saved report versions: every completed analysis stores an immutable report snapshot that can be reopened from the dashboard.
+- Export tools: cleaned CSV download, server-side PDF report, copy insights as markdown, and recent download history.
+- Observability: structured JSON logs shipped to Loki with Grafana dashboards.
 
 ## Upload And Analysis Flow
 
@@ -48,14 +60,32 @@ sequenceDiagram
   F->>A: POST /api/v1/files/upload
   A->>M: Save raw/{job_id}/{filename}
   A->>D: Create queued job
-  A->>Q: Enqueue process_file(job_id)
+  A->>Q: Enqueue prepare_cleaning_review(job_id)
   F->>A: Poll GET /api/v1/jobs/{job_id}/status
   W->>M: Read raw file
-  W->>W: Parse, analyze, clean, chart
+  W->>W: Parse file and build cleaning plan
+  W->>D: Store reviewing status
+  A->>F: Return cleaning_review actions
+  U->>F: Approve or skip cleaning steps
+  F->>A: POST /api/v1/jobs/{job_id}/cleaning-review
+  A->>Q: Enqueue process_file(job_id)
+  W->>W: Analyze, clean, score quality, chart
   W->>G: Request JSON insights
   W->>M: Save cleaned CSV and chart PNGs
-  W->>D: Store final result_json
+  W->>D: Store final result_json and report version
   A->>F: Return done result
+```
+
+## Report Versioning Flow
+
+```mermaid
+flowchart TD
+  done[Analysis completed] --> response[Build result_json]
+  response --> quality[Attach data_quality score]
+  response --> job[(jobs.result_json)]
+  response --> version[(report_versions v1..n)]
+  dashboard[Dashboard] --> versions[GET /api/v1/jobs/{job_id}/versions]
+  versions --> reopen[Reload selected report snapshot]
 ```
 
 ## Auth Flow
@@ -136,6 +166,17 @@ make migrate
 make test
 ```
 
+## Useful API Endpoints
+
+- `POST /auth/register` - create a user.
+- `POST /auth/login` - return access and refresh tokens.
+- `POST /api/v1/files/upload` - upload a dataset and prepare cleaning review.
+- `GET /api/v1/jobs/{job_id}/status` - poll queued, reviewing, processing, done, or failed status.
+- `POST /api/v1/jobs/{job_id}/cleaning-review` - approve or skip cleaning actions and start analysis.
+- `GET /api/v1/jobs/{job_id}/versions` - list saved report versions.
+- `POST /api/v1/assistant/report-chat` - ask grounded report questions.
+- `GET /api/v1/jobs/{job_id}/report.pdf` - download the PDF report.
+
 ## Troubleshooting
 
 - If upload stays queued, check `docker compose logs celery-worker --tail=100`.
@@ -143,6 +184,7 @@ make test
 - If login says session expired, clear browser local storage and reload.
 - If Docker env changes are not picked up, run `docker compose up -d --force-recreate backend celery-worker`.
 - Supported upload types are CSV, JSON, TSV, TXT, XLS, and XLSX.
+- If old reports show "Not scored yet" or no saved versions, rerun/upload the dataset so the latest pipeline can create those fields.
 
 ## Deployment
 

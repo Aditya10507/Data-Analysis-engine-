@@ -9,6 +9,7 @@ from app.services.analysis_semantics import is_date_column, is_numeric_column
 from app.services.storage_service import build_cleaned_object_name, save_object_bytes
 
 OUTLIER_STD_MULTIPLIER = 3
+CleaningOptions = dict[str, bool]
 
 
 @dataclass
@@ -19,15 +20,20 @@ class CleaningResult:
     report: dict[str, Any]
 
 
-def clean_dataframe(dataframe: pd.DataFrame) -> CleaningResult:
+def clean_dataframe(dataframe: pd.DataFrame, options: CleaningOptions | None = None) -> CleaningResult:
     """Clean a DataFrame and return cleaned data plus a report."""
     cleaned_dataframe = dataframe.copy()
     report = {"actions": [], "initial_rows": int(len(cleaned_dataframe))}
     cleaned_dataframe = normalize_columns(cleaned_dataframe, report)
-    cleaned_dataframe = parse_date_columns(cleaned_dataframe, report)
-    cleaned_dataframe = fill_null_values(cleaned_dataframe, report)
-    cleaned_dataframe = remove_duplicate_rows(cleaned_dataframe, report)
-    cleaned_dataframe = clip_numeric_outliers(cleaned_dataframe, report)
+    if is_cleaning_enabled(options, "parse_dates"):
+        cleaned_dataframe = parse_date_columns(cleaned_dataframe, report)
+    if is_cleaning_enabled(options, "fill_nulls"):
+        cleaned_dataframe = fill_null_values(cleaned_dataframe, report)
+    if is_cleaning_enabled(options, "remove_duplicates"):
+        cleaned_dataframe = remove_duplicate_rows(cleaned_dataframe, report)
+    if is_cleaning_enabled(options, "clip_outliers"):
+        cleaned_dataframe = clip_numeric_outliers(cleaned_dataframe, report)
+    report["options"] = options or {}
     report["final_rows"] = int(len(cleaned_dataframe))
     return CleaningResult(dataframe=cleaned_dataframe, report=report)
 
@@ -35,12 +41,18 @@ def clean_dataframe(dataframe: pd.DataFrame) -> CleaningResult:
 def clean_and_save_dataframe(
     job_id: str,
     dataframe: pd.DataFrame,
+    options: CleaningOptions | None = None,
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
     """Clean, save a DataFrame to MinIO, and return data plus report."""
-    result = clean_dataframe(dataframe)
+    result = clean_dataframe(dataframe, options)
     object_name = save_cleaned_dataframe(job_id, result.dataframe)
     result.report["cleaned_object_name"] = object_name
     return result.dataframe, result.report
+
+
+def is_cleaning_enabled(options: CleaningOptions | None, action: str) -> bool:
+    """Read and return whether a cleaning action is enabled."""
+    return True if options is None else options.get(action, True)
 
 
 def normalize_columns(dataframe: pd.DataFrame, report: dict[str, Any]) -> pd.DataFrame:

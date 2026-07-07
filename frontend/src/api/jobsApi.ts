@@ -1,9 +1,10 @@
-import { jobStatusEnvelopeSchema } from "../schemas/fileSchemas";
+import { jobStatusEnvelopeSchema, uploadEnvelopeSchema } from "../schemas/fileSchemas";
+import { cleaningReviewSubmissionSchema } from "../schemas/cleaningReviewSchemas";
 import { jobHistoryEnvelopeSchema } from "../schemas/historySchemas";
 import type { ApiEnvelope } from "../types/api";
-import type { JobStatus } from "../types/files";
+import type { CleaningActionName, JobStatus, UploadJob } from "../types/files";
 import type { JobHistoryFilters, JobHistoryResult } from "../types/history";
-import { requestApi } from "./apiClient";
+import { apiClient, requestApi } from "./apiClient";
 
 const JOB_HISTORY_PATH = "/api/v1/jobs";
 
@@ -19,6 +20,26 @@ export async function fetchJobStatus(jobId: string): Promise<ApiEnvelope<JobStat
     throw new Error("Job status request failed.");
   }
 }
+
+/** Submit cleaning choices and return the queued job envelope. */
+export async function submitCleaningReview(jobId: string, choices: CleaningChoice[]): Promise<ApiEnvelope<UploadJob>> {
+  try {
+    const body = cleaningReviewSubmissionSchema.parse({ choices });
+    const response = await apiClient.post(`/api/v1/jobs/${jobId}/cleaning-review`, body);
+    return uploadEnvelopeSchema.parse(response.data);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    throw new Error("Cleaning review submission failed.");
+  }
+}
+
+export type CleaningChoice = {
+  action: CleaningActionName;
+  is_enabled: boolean;
+};
 
 /** Fetch and return a paginated job history envelope. */
 export async function fetchJobHistory(

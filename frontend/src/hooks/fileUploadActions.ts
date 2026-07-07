@@ -4,10 +4,12 @@ import { fetchJobStatus } from "../api/jobsApi";
 import { selectedFileSchema } from "../schemas/fileSchemas";
 import type { AnalysisStatus } from "../types/app";
 import type { AnalysisResult } from "../types/analysis";
-import type { FilePreview, JobResult, ParsedFilePreview } from "../types/files";
+import type { CleaningReviewPlan, FilePreview, JobResult, ParsedFilePreview } from "../types/files";
+import { parseCleaningReview } from "../utils/cleaningReview";
 import { formatFileSelectionError, formatJobFailure } from "../utils/uploadErrors";
 import { buildFilePreview } from "./filePreview";
 import { applyJobResult } from "./jobResultActions";
+import { buildProgressHandler } from "./uploadProgress";
 
 export type FileUploadState = {
   errorMessage: string | null;
@@ -18,6 +20,7 @@ export type FileUploadState = {
 
 export type StoreActions = {
   setAnalysisResult: (analysisResult: AnalysisResult | null) => void;
+  setCleaningReview: (cleaningReview: CleaningReviewPlan | null) => void;
   setJobErrorMessage: (jobErrorMessage: string | null) => void;
   setJobId: (jobId: string | null) => void;
   setJobResult: (jobResult: JobResult | null) => void;
@@ -43,15 +46,6 @@ export const INITIAL_UPLOAD_STATE: FileUploadState = {
   progress: 0,
 };
 
-export const PROGRESS_BY_STATUS: Record<AnalysisStatus, number> = {
-  idle: 0,
-  uploading: 15,
-  queued: 50,
-  processing: 75,
-  done: 100,
-  failed: 100,
-};
-
 /** Poll the backend job and return no content. */
 export async function pollJobStatus(
   jobId: string,
@@ -63,6 +57,7 @@ export async function pollJobStatus(
     const jobStatus = envelope.data?.status ?? "failed";
     actions.setStatus(jobStatus);
     actions.setJobErrorMessage(readJobErrorMessage(envelope.data?.error_msg ?? null, jobStatus));
+    actions.setCleaningReview(readCleaningReview(envelope.data?.result_json ?? null, jobStatus));
     applyJobResult(envelope.data ?? null, actions);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Job status polling failed.";
@@ -99,6 +94,7 @@ async function selectFile(
     actions.setUploadedFile(file);
     actions.setStatus("idle");
     actions.setAnalysisResult(null);
+    actions.setCleaningReview(null);
     actions.setJobErrorMessage(null);
     actions.setJobId(null);
     actions.setJobResult(null);
@@ -122,6 +118,7 @@ async function startUpload(
 
     actions.setStatus("uploading");
     actions.setJobErrorMessage(null);
+    actions.setCleaningReview(null);
     actions.setJobResult(null);
     const envelope = await uploadFile(actions.uploadedFile, buildProgressHandler(setUploadState));
     actions.setJobId(envelope.data?.job_id ?? null);
@@ -134,16 +131,12 @@ async function startUpload(
   }
 }
 
-/** Build and return a real upload progress handler. */
-function buildProgressHandler(setUploadState: Dispatch<SetStateAction<FileUploadState>>) {
-  return (loadedBytes: number, totalBytes: number) => {
-    const ratio = totalBytes > 0 ? loadedBytes / totalBytes : 0;
-    const progress = Math.min(45, Math.max(15, Math.round(ratio * 45)));
-    setUploadState((state) => ({ ...state, progress }));
-  };
-}
-
 /** Read and return a formatted job error when the job failed. */
 function readJobErrorMessage(errorMessage: string | null, status: AnalysisStatus): string | null {
   return status === "failed" ? formatJobFailure(errorMessage) : null;
+}
+
+/** Read and return a cleaning review when the job is waiting for approval. */
+function readCleaningReview(resultJson: Record<string, unknown> | null, status: AnalysisStatus): CleaningReviewPlan | null {
+  return status === "reviewing" ? parseCleaningReview(resultJson) : null;
 }

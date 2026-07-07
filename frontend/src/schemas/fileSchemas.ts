@@ -49,7 +49,7 @@ export const jobStatusEnvelopeSchema = z.object({
     error_msg: z.string().nullable(),
     job_id: z.string().min(1),
     result_json: z.record(z.unknown()).nullable(),
-    status: z.enum(["queued", "processing", "done", "failed"]),
+    status: z.enum(["queued", "reviewing", "processing", "done", "failed"]),
   }).nullable(),
   error: z.string().nullable(),
 });

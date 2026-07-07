@@ -1,6 +1,6 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { askReportAssistant } from "../api/reportAssistantApi";
-import type { AssistantMessage } from "../types/assistant";
+import type { AssistantMessage, AssistantSource } from "../types/assistant";
 
 const WELCOME_MESSAGE = "Ask me about this report: missing values, duplicates, columns, charts, or recommendations.";
 
@@ -15,14 +15,16 @@ export function useReportAssistant(input: ReportAssistantInput) {
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<AssistantMessage[]>([buildAssistantMessage(WELCOME_MESSAGE)]);
 
-  async function submitQuestion(): Promise<void> {
-    const question = draft.trim();
+  async function submitQuestion(nextQuestion?: string): Promise<void> {
+    const question = (nextQuestion ?? draft).trim();
     if (!question) {
       return;
     }
 
     setMessages((items) => [...items, buildUserMessage(question)]);
-    setDraft("");
+    if (!nextQuestion) {
+      setDraft("");
+    }
     await requestAssistantAnswer(input.jobId, question, setMessages, setErrorMessage, setIsLoading);
   }
 
@@ -41,7 +43,7 @@ async function requestAssistantAnswer(
     setErrorMessage(null);
     setIsLoading(true);
     const envelope = await askReportAssistant(jobId, question);
-    setMessages((items) => [...items, buildAssistantMessage(envelope.data?.answer ?? "No answer returned.")]);
+    setMessages((items) => [...items, buildAssistantMessage(envelope.data?.answer ?? "No answer returned.", envelope.data?.source)]);
   } catch (error) {
     setErrorMessage(error instanceof Error ? error.message : "Report assistant failed.");
   } finally {
@@ -50,8 +52,8 @@ async function requestAssistantAnswer(
 }
 
 /** Build and return an assistant message. */
-function buildAssistantMessage(content: string): AssistantMessage {
-  return { content, id: crypto.randomUUID(), role: "assistant" };
+function buildAssistantMessage(content: string, source?: AssistantSource): AssistantMessage {
+  return { content, id: crypto.randomUUID(), role: "assistant", source };
 }
 
 /** Build and return a user message. */

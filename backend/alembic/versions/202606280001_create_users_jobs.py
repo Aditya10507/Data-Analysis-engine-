@@ -33,6 +33,7 @@ def build_job_status_enum(create_type: bool = True) -> postgresql.ENUM:
     """Build and return the PostgreSQL job status enum."""
     return postgresql.ENUM(
         "queued",
+        "reviewing",
         "processing",
         "done",
         "failed",

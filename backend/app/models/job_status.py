@@ -2,7 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-JobStatusValue = Literal["queued", "processing", "done", "failed"]
+JobStatusValue = Literal["queued", "reviewing", "processing", "done", "failed"]
 
 
 class JobStatusResult(BaseModel):

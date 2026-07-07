@@ -15,7 +15,8 @@ type PipelineStep = {
 
 const PIPELINE_STEPS: PipelineStep[] = [
   { label: "Uploading", status: ["uploading"] },
-  { label: "Parsing", status: ["queued", "processing"] },
+  { label: "Parsing", status: ["queued"] },
+  { label: "Cleaning review", status: ["reviewing"] },
   { label: "Cleaning", status: ["processing"] },
   { label: "Profiling", status: ["processing"] },
   { label: "AI insights", status: ["processing"] },

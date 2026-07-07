@@ -5,11 +5,11 @@ import {
   buildUploadController,
   INITIAL_UPLOAD_STATE,
   pollJobStatus,
-  PROGRESS_BY_STATUS,
   type FileUploadController,
   type FileUploadState,
   type StoreActions,
 } from "./fileUploadActions";
+import { PROGRESS_BY_STATUS } from "./uploadProgress";
 
 const POLL_INTERVAL_MS = 2000;
 
@@ -23,7 +23,7 @@ function useJobStatusPolling(
   setUploadState: Dispatch<SetStateAction<FileUploadState>>,
 ): void {
   useEffect(() => {
-    if (!jobId || status === "done" || status === "failed") {
+    if (!jobId || status === "reviewing" || status === "done" || status === "failed") {
       return undefined;
     }
 
@@ -55,6 +55,7 @@ export function useFileUpload(): FileUploadController {
 function useUploadStoreActions(status: AnalysisStatus): StoreActions {
   const uploadedFile = useAppStore((state) => state.uploadedFile);
   const setAnalysisResult = useAppStore((state) => state.setAnalysisResult);
+  const setCleaningReview = useAppStore((state) => state.setCleaningReview);
   const setJobErrorMessage = useAppStore((state) => state.setJobErrorMessage);
   const setJobId = useAppStore((state) => state.setJobId);
   const setJobResult = useAppStore((state) => state.setJobResult);
@@ -63,6 +64,7 @@ function useUploadStoreActions(status: AnalysisStatus): StoreActions {
   const setUploadedFile = useAppStore((state) => state.setUploadedFile);
   return useMemo<StoreActions>(() => ({
     setAnalysisResult,
+    setCleaningReview,
     setJobErrorMessage,
     setJobId,
     setJobResult,
@@ -73,6 +75,7 @@ function useUploadStoreActions(status: AnalysisStatus): StoreActions {
     uploadedFile,
   }), [
     setAnalysisResult,
+    setCleaningReview,
     setJobErrorMessage,
     setJobId,
     setJobResult,

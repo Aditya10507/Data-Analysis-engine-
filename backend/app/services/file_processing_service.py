@@ -15,6 +15,7 @@ from app.services.dataframe_reader_service import parse_dataframe
 from app.services.insight_context_service import build_insight_context
 from app.services.insight_service import generate_insights
 from app.services.redis_cache_service import invalidate_job_cache_sync, set_cached_job_result_sync
+from app.services.report_version_service import save_completed_report_version
 from app.services.response_builder import build_job_response
 from app.services.storage_service import build_object_name, read_object_bytes
 
@@ -33,6 +34,7 @@ def process_uploaded_file(job_id: str) -> None:
         job = fetch_job_record(db_session, job_id)
         update_job_record(db_session, job_id, PROCESSING_STATUS, build_partial_result(job))
         result_json = process_job_file(job)
+        save_completed_report_version(db_session, job_id, result_json)
         update_job_record(db_session, job_id, DONE_STATUS, result_json)
         set_cached_job_result_sync(job_id, result_json)
     except Exception as error:
@@ -48,7 +50,7 @@ def process_job_file(job: Job) -> dict[str, Any]:
     """Run the full file processing pipeline and return result JSON."""
     dataframe = read_job_dataframe(job)
     stats = analyze_dataframe(dataframe)
-    cleaned_dataframe, cleaning_report = clean_and_save_dataframe(job.id, dataframe)
+    cleaned_dataframe, cleaning_report = clean_and_save_dataframe(job.id, dataframe, read_cleaning_options(job))
     charts = generate_chart_specs(job.id, cleaned_dataframe)
     insights = generate_insights(build_insight_context(stats, cleaning_report))
     return build_job_response(
@@ -60,6 +62,13 @@ def process_job_file(job: Job) -> dict[str, Any]:
         charts=charts,
         insights=insights.model_dump()["insights"],
     )
+
+
+def read_cleaning_options(job: Job) -> dict[str, bool]:
+    """Read approved cleaning options from the job and return them."""
+    result_json = job.result_json or {}
+    options = result_json.get("cleaning_options")
+    return options if isinstance(options, dict) else {}
 
 
 def read_job_dataframe(job: Job) -> pd.DataFrame:

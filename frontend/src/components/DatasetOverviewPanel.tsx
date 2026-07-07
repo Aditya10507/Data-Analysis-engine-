@@ -1,9 +1,7 @@
-import { Database, ShieldCheck } from "lucide-react";
+import { Database } from "lucide-react";
 import type { AnalysisResult } from "../types/analysis";
 import type { JobResult, ParsedFilePreview, PreviewColumn } from "../types/files";
-
-const CONFIDENCE_MAX_SCORE = 100;
-const QUALITY_PENALTY_WEIGHT = 0.7;
+import { ShowDataQualityBadge } from "./DataQualityBadge";
 
 type DatasetOverviewPanelProps = {
   analysisResult: AnalysisResult;
@@ -18,9 +16,8 @@ type OverviewMetric = {
 
 /** Show and return the dataset overview panel. */
 export function ShowDatasetOverviewPanel({ analysisResult, jobResult, preview }: DatasetOverviewPanelProps) {
-  const confidenceScore = calculateConfidenceScore(analysisResult);
   const typeCounts = countColumnTypes(preview?.columns ?? []);
-  const metrics = buildOverviewMetrics(analysisResult, jobResult, preview, confidenceScore);
+  const metrics = buildOverviewMetrics(analysisResult, jobResult, preview);
 
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -34,7 +31,7 @@ export function ShowDatasetOverviewPanel({ analysisResult, jobResult, preview }:
             {analysisResult.summary}
           </p>
         </div>
-        <ShowConfidenceBadge score={confidenceScore} />
+        <ShowDataQualityBadge dataQuality={jobResult?.data_quality ?? null} />
       </div>
       <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {metrics.map((metric) => <ShowOverviewMetric key={metric.label} metric={metric} />)}
@@ -47,19 +44,6 @@ export function ShowDatasetOverviewPanel({ analysisResult, jobResult, preview }:
         ))}
       </div>
     </section>
-  );
-}
-
-/** Show and return an analysis confidence badge. */
-function ShowConfidenceBadge({ score }: { score: number }) {
-  return (
-    <div className="inline-flex items-center gap-3 rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-emerald-700">
-      <ShieldCheck className="h-5 w-5" aria-hidden="true" />
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wide">Analysis confidence</p>
-        <p className="text-2xl font-semibold">{score}/100</p>
-      </div>
-    </div>
   );
 }
 
@@ -81,13 +65,12 @@ function buildOverviewMetrics(
   analysisResult: AnalysisResult,
   jobResult: JobResult | null,
   preview: ParsedFilePreview | null,
-  confidenceScore: number,
 ): OverviewMetric[] {
   return [
     { label: "Rows", value: analysisResult.rowCount.toLocaleString() },
     { label: "Columns", value: analysisResult.columnCount.toLocaleString() },
     { label: "Preview rows", value: (preview?.rows.length ?? 0).toLocaleString() },
-    { label: "Confidence", value: `${confidenceScore}%` },
+    { label: "Quality grade", value: jobResult?.data_quality?.grade ?? "Pending" },
     { label: "File", value: jobResult?.filename ?? "Uploaded dataset" },
     { label: "Download", value: jobResult?.download_urls.cleaned_csv ? "Cleaned CSV ready" : "Not ready" },
     { label: "Nulls", value: `${analysisResult.nullPercent.toFixed(1)}%` },
@@ -101,10 +84,4 @@ function countColumnTypes(columns: PreviewColumn[]): Record<string, number> {
     counts[column.type] = (counts[column.type] ?? 0) + 1;
     return counts;
   }, {});
-}
-
-/** Calculate and return an analysis confidence score. */
-function calculateConfidenceScore(analysisResult: AnalysisResult): number {
-  const qualityPenalty = (analysisResult.nullPercent + analysisResult.duplicateRowPercent) * QUALITY_PENALTY_WEIGHT;
-  return Math.max(0, Math.round(CONFIDENCE_MAX_SCORE - qualityPenalty));
 }

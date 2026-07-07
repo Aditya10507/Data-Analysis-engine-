@@ -14,3 +14,4 @@ class ReportChatResult(BaseModel):
     """Represent a report assistant answer response."""
 
     answer: str
+    source: str

@@ -2,11 +2,12 @@ import type { ChangeEvent, DragEvent, ReactElement } from "react";
 import { FileText, LoaderCircle } from "lucide-react";
 import { useFileUpload, type FileUploadController } from "../hooks/useFileUpload";
 import { useAppStore } from "../store/appStore";
+import { ShowCleaningReviewPanel } from "./CleaningReviewPanel";
 import { ShowJobFailurePanel } from "./JobFailurePanel";
 import { ShowUploadErrorMessage } from "./UploadErrorMessage";
 import { ShowUploadPipelineSteps } from "./UploadPipelineSteps";
 const ACCEPTED_FILE_TYPES = ".csv,.json,.tsv,.txt,.xls,.xlsx";
-const ACTIVE_STATUSES = new Set(["uploading", "queued", "processing"]);
+const ACTIVE_STATUSES = new Set(["uploading", "queued", "reviewing", "processing"]);
 
 /** Build and return a drop zone class name. */
 function buildDropZoneClass(isDragging: boolean): string {
@@ -43,7 +44,7 @@ function renderProgress(upload: FileUploadController): ReactElement | null {
 /** Show and return the upload action button. */
 function renderUploadButton(upload: FileUploadController): ReactElement {
   const isProcessing = ACTIVE_STATUSES.has(upload.status);
-  const buttonLabel = upload.status === "failed" ? "Retry upload" : "Upload";
+  const buttonLabel = upload.status === "reviewing" ? "Review required" : upload.status === "failed" ? "Retry upload" : "Upload";
 
   return (
     <button
@@ -122,12 +123,15 @@ function renderDropZone(upload: FileUploadController): ReactElement {
 /** Show and return the drag-and-drop file upload component. */
 export function ShowFileUploadDropzone() {
   const upload = useFileUpload();
+  const cleaningReview = useAppStore((state) => state.cleaningReview);
+  const jobId = useAppStore((state) => state.jobId);
   const jobErrorMessage = useAppStore((state) => state.jobErrorMessage);
 
   return (
     <div className="space-y-5">
       {renderDropZone(upload)}
       {renderProgress(upload)}
+      {cleaningReview && jobId ? <ShowCleaningReviewPanel jobId={jobId} review={cleaningReview} /> : null}
       {upload.errorMessage ? <ShowUploadErrorMessage errorMessage={upload.errorMessage} /> : null}
       {jobErrorMessage ? (
         <ShowJobFailurePanel errorMessage={jobErrorMessage} onRetry={() => void upload.startUpload()} />

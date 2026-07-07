@@ -16,6 +16,7 @@ class JobStatus(str, enum.Enum):
     """Represent supported persisted job statuses."""
 
     queued = "queued"
+    reviewing = "reviewing"
     processing = "processing"
     done = "done"
     failed = "failed"

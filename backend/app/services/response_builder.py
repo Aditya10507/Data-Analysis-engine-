@@ -3,6 +3,7 @@ from typing import Any
 import pandas as pd
 
 from app.models.job import Job
+from app.services.data_quality_service import build_data_quality_score
 from app.services.storage_service import (
     build_cleaned_object_name,
     build_object_name,
@@ -27,6 +28,7 @@ def build_job_response(
         "charts": charts,
         "cleaning_report": build_cleaning_report(cleaning_report),
         "column_meta": build_column_meta(stats),
+        "data_quality": build_data_quality_score(stats, cleaning_report),
         "download_urls": build_download_urls(job),
         "filename": job.filename,
         "insights": insights,

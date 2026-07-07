@@ -6,6 +6,7 @@ const REPORT_CHAT_PATH = "/api/v1/assistant/report-chat";
 
 type ReportChatResult = {
   answer: string;
+  source: "groq" | "report" | "guardrail";
 };
 
 /** Ask the report assistant and return an answer envelope. */

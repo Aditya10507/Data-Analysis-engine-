@@ -8,7 +8,7 @@ from app.models.file_upload import FileUploadResult
 from app.models.job_repository import create_job_record
 from app.models.user_repository import ensure_user_record
 from app.services.storage_service import save_raw_file
-from app.tasks.file_tasks import process_file
+from app.tasks.file_tasks import prepare_cleaning_review
 
 ALLOWED_EXTENSIONS = {".csv", ".json", ".tsv", ".txt", ".xls", ".xlsx"}
 ALLOWED_FORMATS_LABEL = "CSV, JSON, TSV, TXT, XLS, or XLSX"
@@ -44,7 +44,7 @@ def create_upload_job(
     file_bytes: bytes,
     user_id_value: str = SYSTEM_USER_ID,
 ) -> FileUploadResult:
-    """Store an upload, create a job, enqueue processing, and return job details."""
+    """Store an upload, create a job, enqueue review preparation, and return details."""
     filename = validate_upload(uploaded_file, file_bytes)
     job_uuid = uuid4()
     user_id = parse_uuid(user_id_value)
@@ -52,7 +52,7 @@ def create_upload_job(
     ensure_system_user(db_session, user_id_value, user_id)
     save_raw_file(job_id, filename, file_bytes)
     create_job_record(db_session, job_uuid, user_id, filename, len(file_bytes))
-    process_file.delay(job_id)
+    prepare_cleaning_review.delay(job_id)
     return FileUploadResult(job_id=job_id, status=QUEUED_STATUS)
 
 

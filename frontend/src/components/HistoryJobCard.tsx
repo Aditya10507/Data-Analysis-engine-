@@ -11,6 +11,7 @@ const STATUS_CLASS: Record<JobHistoryItem["status"], string> = {
   failed: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
   processing: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
   queued: "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
+  reviewing: "bg-violet-50 text-violet-700 dark:bg-violet-950 dark:text-violet-300",
 };
 
 /** Show and return one history job card. */

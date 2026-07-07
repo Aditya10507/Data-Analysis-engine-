@@ -9,7 +9,7 @@ def normalize_job_status(status: str | JobStatus) -> JobStatusValue:
     """Normalize and return a public job status value."""
     status_value = status.value if isinstance(status, JobStatus) else status
 
-    if status_value in {"queued", "processing", "done", "failed"}:
+    if status_value in {"queued", "reviewing", "processing", "done", "failed"}:
         return status_value
 
     return "failed"

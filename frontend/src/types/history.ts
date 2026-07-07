@@ -1,6 +1,6 @@
 import type { JobResult } from "./files";
 
-export type JobHistoryStatus = "queued" | "processing" | "done" | "failed";
+export type JobHistoryStatus = "queued" | "reviewing" | "processing" | "done" | "failed";
 
 export type JobHistoryItem = {
   column_count: number;

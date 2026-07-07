@@ -9,6 +9,7 @@ import { ShowDashboardExportControls } from "../components/DashboardExportContro
 import { ShowDatasetOverviewPanel } from "../components/DatasetOverviewPanel";
 import { ShowExecutiveSummaryPanel } from "../components/ExecutiveSummaryPanel";
 import { ShowHealthStatusPanel } from "../components/HealthStatusPanel";
+import { ShowReportVersionsPanel } from "../components/ReportVersionsPanel";
 import { ShowSmartChartRecommendations } from "../components/SmartChartRecommendations";
 import { useFetchHealthStatus } from "../hooks/useHealthStatus";
 import { useAppStore } from "../store/appStore";
@@ -30,6 +31,7 @@ export function DisplayDashboardPage() {
       {analysisResult ? <ShowDatasetOverviewPanel analysisResult={analysisResult} jobResult={jobResult} preview={parsedPreview} /> : null}
       {analysisResult ? <ShowDashboardKpis analysisResult={analysisResult} /> : null}
       {analysisResult ? <ShowDashboardExportControls /> : null}
+      {analysisResult ? <ShowReportVersionsPanel jobResult={jobResult} /> : null}
       {analysisResult ? <ShowExecutiveSummaryPanel analysisResult={analysisResult} jobResult={jobResult} /> : null}
       {analysisResult ? <ShowSmartChartRecommendations analysisResult={analysisResult} onSelectChart={setActiveChart} /> : null}
       {parsedPreview ? <ShowColumnExplorerPanel onFocusColumn={setSelectedColumn} preview={parsedPreview} selectedColumn={selectedColumn} /> : null}

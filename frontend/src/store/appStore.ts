@@ -2,13 +2,14 @@ import { create } from "zustand";
 
 import type { AnalysisResult, AnalysisStatus, AppView } from "../types/app";
 import type { DownloadRecord } from "../types/downloads";
-import type { JobResult, ParsedFilePreview } from "../types/files";
+import type { CleaningReviewPlan, JobResult, ParsedFilePreview } from "../types/files";
 
 const MAX_DOWNLOAD_HISTORY_ITEMS = 5;
 
 type AppState = {
   activeView: AppView;
   analysisResult: AnalysisResult | null;
+  cleaningReview: CleaningReviewPlan | null;
   hasApiConnection: boolean;
   isDarkMode: boolean;
   downloadHistory: DownloadRecord[];
@@ -22,6 +23,7 @@ type AppState = {
   setApiConnection: (hasApiConnection: boolean) => void;
   setActiveView: (activeView: AppView) => void;
   setAnalysisResult: (analysisResult: AnalysisResult | null) => void;
+  setCleaningReview: (cleaningReview: CleaningReviewPlan | null) => void;
   setJobId: (jobId: string | null) => void;
   setJobErrorMessage: (jobErrorMessage: string | null) => void;
   setParsedPreview: (parsedPreview: ParsedFilePreview | null) => void;
@@ -34,6 +36,7 @@ type AppState = {
 export const useAppStore = create<AppState>((set) => ({
   activeView: "upload",
   analysisResult: null,
+  cleaningReview: null,
   hasApiConnection: false,
   isDarkMode: false,
   downloadHistory: [],
@@ -49,6 +52,7 @@ export const useAppStore = create<AppState>((set) => ({
   setApiConnection: (hasApiConnection) => set({ hasApiConnection }),
   setActiveView: (activeView) => set({ activeView }),
   setAnalysisResult: (analysisResult) => set({ analysisResult }),
+  setCleaningReview: (cleaningReview) => set({ cleaningReview }),
   setJobId: (jobId) => set({ jobId }),
   setJobErrorMessage: (jobErrorMessage) => set({ jobErrorMessage }),
   setParsedPreview: (parsedPreview) => set({ parsedPreview }),
