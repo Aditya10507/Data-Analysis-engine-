@@ -16,9 +16,10 @@ export function DisplayHistoryPage() {
   const loadDashboardResult = useDashboardResultLoader();
 
   return (
-    <section className="mx-auto max-w-5xl space-y-6">
-      <div className="rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-        <h3 className="text-lg font-semibold text-slate-950 dark:text-white">History</h3>
+    <section className="mx-auto max-w-6xl space-y-8">
+      <header><p className="text-sm font-semibold text-blue-600">REPORT LIBRARY</p><h1 className="mt-1 text-3xl font-bold text-slate-950 dark:text-white">Analysis history</h1><p className="mt-2 text-sm text-slate-600 dark:text-slate-300">Search, review, and reopen completed business reports.</p></header>
+      <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <h2 className="font-semibold text-slate-950 dark:text-white">Find a report</h2>
         <div className="mt-5">
           <ShowHistoryFilters filters={filters} onApply={(nextFilters) => applyFilters(nextFilters, setFilters, setFilterError)} />
         </div>

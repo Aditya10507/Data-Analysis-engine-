@@ -11,10 +11,10 @@ type MissingValuesChartProps = {
 function buildConfig(series: MissingValueSeries): ChartConfiguration {
   return {
     data: {
-      datasets: [{ backgroundColor: "#f97316", data: series.values, label: "Missing values" }],
+      datasets: [{ backgroundColor: "#f59e0bCC", borderColor: "#d97706", borderRadius: 5, borderWidth: 1, data: series.values, label: "Missing values" }],
       labels: series.labels,
     },
-    options: { maintainAspectRatio: false, responsive: true },
+    options: { indexAxis: "y", interaction: { intersect: false, mode: "index" }, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { displayColors: false } }, responsive: true, scales: { x: { beginAtZero: true, grid: { color: "#e2e8f0" }, title: { display: true, text: "Missing cells" } }, y: { grid: { display: false } } } },
     type: "bar",
   };
 }
@@ -24,7 +24,7 @@ export function ShowMissingValuesChart({ series }: MissingValuesChartProps) {
   const config = useMemo(() => buildConfig(series), [series]);
 
   return (
-    <div className="h-96 min-w-[760px] rounded-lg border border-orange-100 bg-orange-50/40 p-4 dark:border-slate-800 dark:bg-slate-950">
+    <div className="h-[460px] min-w-[760px] rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
       <ShowChartCanvas config={config} />
     </div>
   );

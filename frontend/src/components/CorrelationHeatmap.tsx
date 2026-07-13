@@ -24,11 +24,12 @@ function renderHeatmap(svgElement: SVGSVGElement, cells: CorrelationCell[], labe
   const svg = d3.select(svgElement);
   svg.selectAll("*").remove();
   svg.attr("height", height).attr("viewBox", `0 0 ${width} ${height}`).attr("width", width);
-  svg.selectAll("rect").data(cells).join("rect")
+  const rectangles = svg.selectAll("rect").data(cells).join("rect")
     .attr("x", (cell) => LABEL_OFFSET + labels.indexOf(cell.xColumn) * CELL_SIZE)
     .attr("y", (cell) => LABEL_OFFSET + labels.indexOf(cell.yColumn) * CELL_SIZE)
     .attr("width", CELL_SIZE).attr("height", CELL_SIZE)
-    .attr("fill", (cell) => colorScale(cell.value));
+    .attr("fill", (cell) => colorScale(cell.value)).attr("rx", 3);
+  rectangles.append("title").text((cell) => `${cell.xColumn} and ${cell.yColumn}: ${cell.value.toFixed(3)}`);
   svg.selectAll(".x-label").data(labels).join("text")
     .attr("x", (_, index) => LABEL_OFFSET + index * CELL_SIZE + CELL_SIZE / 2)
     .attr("y", LABEL_OFFSET - 18)
@@ -62,7 +63,7 @@ export function ShowCorrelationHeatmap({ cells }: CorrelationHeatmapProps) {
   }
 
   return (
-    <div className="max-h-[560px] overflow-x-auto overflow-y-auto rounded-lg border border-violet-100 bg-violet-50/40 p-4 dark:border-slate-800 dark:bg-slate-950">
+    <div className="max-h-[620px] overflow-x-auto overflow-y-auto rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
       <svg ref={svgRef} className="text-xs text-slate-600 dark:text-slate-300" />
     </div>
   );

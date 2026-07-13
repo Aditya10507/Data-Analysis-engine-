@@ -24,11 +24,11 @@ type ChartPanelProps = {
   selectedColumn: string | null;
 };
 
-const CHART_TABS: { label: string; value: ChartTab }[] = [
-  { label: "Distribution", value: "distribution" },
-  { label: "Correlation", value: "correlation" },
-  { label: "Trends", value: "trends" },
-  { label: "Missing values", value: "missing" },
+const CHART_TABS: { description: string; label: string; value: ChartTab }[] = [
+  { description: "Understand concentration, spread, and unusual values.", label: "Distribution", value: "distribution" },
+  { description: "Compare the strength and direction of numeric relationships.", label: "Correlation", value: "correlation" },
+  { description: "Explore how numeric measures move across row order.", label: "Trends", value: "trends" },
+  { description: "Identify incomplete fields that may affect decisions.", label: "Missing values", value: "missing" },
 ];
 
 /** Show and return the responsive dashboard chart panel. */
@@ -38,6 +38,7 @@ export function ShowChartPanel(props: ChartPanelProps) {
   const [isThreeDimensionalMounted, setIsThreeDimensionalMounted] = useState(initialChartMode === "3d");
   const { activeTab, analysisResult, jobId, onActiveTabChange, onSelectedColumnChange, selectedColumn } = props;
   const activeLabel = CHART_TABS.find((tab) => tab.value === activeTab)?.label ?? "chart";
+  const activeDescription = CHART_TABS.find((tab) => tab.value === activeTab)?.description ?? "Explore report data.";
   const selectableColumns = buildSelectableColumns(analysisResult, activeTab);
 
   useEffect(() => {
@@ -47,21 +48,20 @@ export function ShowChartPanel(props: ChartPanelProps) {
 
   return (
     <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <div className="border-b border-slate-100 p-5 dark:border-slate-800">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-          <ShowChartTabs activeTab={activeTab} onActiveTabChange={onActiveTabChange} />
-          <ShowChartModeToggle chartMode={chartMode} onChartModeChange={(nextMode) => handleChartModeChange(nextMode, setChartMode, setIsThreeDimensionalMounted)} />
-        </div>
-        <ShowChartColumnControls columns={selectableColumns} onChange={onSelectedColumnChange} selectedColumn={selectedColumn} />
-      </div>
-      <div className="p-5">
+      <ShowChartPanelHeader activeDescription={activeDescription} activeLabel={activeLabel} activeTab={activeTab} chartMode={chartMode} columns={selectableColumns} onActiveTabChange={onActiveTabChange} onChartModeChange={(nextMode) => handleChartModeChange(nextMode, setChartMode, setIsThreeDimensionalMounted)} onSelectedColumnChange={onSelectedColumnChange} selectedColumn={selectedColumn} />
+      <div className="bg-slate-50/70 p-5 dark:bg-slate-950/40">
         <ShowChartAiActions chartLabel={activeLabel} jobId={jobId} />
       </div>
-      <div className="max-h-[720px] overflow-x-auto overflow-y-auto px-5 pb-5">
+      <div className="max-h-[760px] overflow-x-auto overflow-y-auto p-5">
         {renderChartOutput(chartMode, activeTab, analysisResult, selectedColumn, isThreeDimensionalMounted)}
       </div>
     </section>
   );
+}
+
+/** Show and return chart navigation, mode, and column controls. */
+function ShowChartPanelHeader(props: { activeDescription: string; activeLabel: string; activeTab: ChartTab; chartMode: ChartMode; columns: string[]; onActiveTabChange: (tab: ChartTab) => void; onChartModeChange: (mode: ChartMode) => void; onSelectedColumnChange: (column: string | null) => void; selectedColumn: string | null }) {
+  return <div className="border-b border-slate-100 p-5 dark:border-slate-800"><div className="mb-5"><p className="text-sm font-semibold text-blue-600">VISUAL EXPLORER</p><h2 className="mt-1 text-xl font-bold text-slate-950 dark:text-white">{props.activeLabel}</h2><p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{props.activeDescription}</p></div><div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between"><ShowChartTabs activeTab={props.activeTab} onActiveTabChange={props.onActiveTabChange} /><ShowChartModeToggle chartMode={props.chartMode} onChartModeChange={props.onChartModeChange} /></div><ShowChartColumnControls columns={props.columns} onChange={props.onSelectedColumnChange} selectedColumn={props.selectedColumn} /></div>;
 }
 
 /** Update the chart mode smoothly and return no content. */

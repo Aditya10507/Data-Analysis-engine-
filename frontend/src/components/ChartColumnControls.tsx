@@ -1,10 +1,10 @@
+import { ListFilter } from "lucide-react";
+
 type ChartColumnControlsProps = {
   columns: string[];
   onChange: (columnName: string | null) => void;
   selectedColumn: string | null;
 };
-
-const MAX_VISIBLE_COLUMN_CHIPS = 12;
 
 /** Show and return chart column focus controls. */
 export function ShowChartColumnControls(props: ChartColumnControlsProps) {
@@ -13,26 +13,9 @@ export function ShowChartColumnControls(props: ChartColumnControlsProps) {
   }
 
   return (
-    <div className="mt-4 flex flex-wrap gap-2">
-      <button className={buildColumnChipClass(!props.selectedColumn)} type="button" onClick={() => props.onChange(null)}>
-        All columns
-      </button>
-      {props.columns.slice(0, MAX_VISIBLE_COLUMN_CHIPS).map((columnName) => (
-        <button
-          key={columnName}
-          className={buildColumnChipClass(props.selectedColumn === columnName)}
-          type="button"
-          onClick={() => props.onChange(columnName)}
-        >
-          {columnName}
-        </button>
-      ))}
+    <div className="mt-4 flex max-w-md items-center gap-3">
+      <ListFilter className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
+      <label className="min-w-0 flex-1"><span className="sr-only">Focus chart on a column</span><select className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200" value={props.selectedColumn ?? ""} onChange={(event) => props.onChange(event.target.value || null)}><option value="">All available columns</option>{props.columns.map((columnName) => <option key={columnName} value={columnName}>{columnName}</option>)}</select></label>
     </div>
   );
-}
-
-/** Build and return a column chip class. */
-function buildColumnChipClass(isActive: boolean): string {
-  const baseClass = "rounded-full px-3 py-1 text-xs font-semibold";
-  return isActive ? `${baseClass} bg-blue-600 text-white` : `${baseClass} bg-slate-100 text-slate-600 hover:bg-blue-50 dark:bg-slate-800 dark:text-slate-300`;
 }

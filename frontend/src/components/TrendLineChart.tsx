@@ -14,13 +14,18 @@ function buildConfig(series: TrendSeries[]): ChartConfiguration {
   return {
     data: {
       datasets: series.map((item, index) => ({
+        backgroundColor: `${LINE_COLORS[index % LINE_COLORS.length]}12`,
         borderColor: LINE_COLORS[index % LINE_COLORS.length],
+        borderWidth: 2,
         data: item.points,
+        fill: series.length === 1,
         label: item.columnName,
-        tension: 0.25,
+        pointHoverRadius: 5,
+        pointRadius: 0,
+        tension: 0.35,
       })),
     },
-    options: { maintainAspectRatio: false, parsing: false, responsive: true, scales: { y: { beginAtZero: false } } },
+    options: { interaction: { intersect: false, mode: "index" }, maintainAspectRatio: false, parsing: false, plugins: { legend: { labels: { usePointStyle: true } } }, responsive: true, scales: { x: { grid: { display: false }, title: { display: true, text: "Row index" } }, y: { beginAtZero: false, grid: { color: "#e2e8f0" } } } },
     type: "line",
   };
 }
@@ -34,7 +39,7 @@ export function ShowTrendLineChart({ series }: TrendLineChartProps) {
   }
 
   return (
-    <div className="h-96 min-w-[820px] rounded-lg border border-emerald-100 bg-emerald-50/40 p-4 dark:border-slate-800 dark:bg-slate-950">
+    <div className="h-[460px] min-w-[820px] rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
       <ShowChartCanvas config={config} />
     </div>
   );

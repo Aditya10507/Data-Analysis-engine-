@@ -11,12 +11,13 @@ const CHART_COLORS = ["#2563eb", "#16a34a", "#f97316", "#7c3aed", "#dc2626"];
 
 /** Build and return a bar chart config for one histogram. */
 function buildConfig(series: HistogramSeries, index: number): ChartConfiguration {
+  const color = CHART_COLORS[index % CHART_COLORS.length];
   return {
     data: {
-      datasets: [{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length], data: series.values, label: series.columnName }],
+      datasets: [{ backgroundColor: `${color}CC`, borderColor: color, borderRadius: 5, borderWidth: 1, data: series.values, label: series.columnName }],
       labels: series.labels,
     },
-    options: { maintainAspectRatio: false, responsive: true, scales: { y: { beginAtZero: true } } },
+    options: { interaction: { intersect: false, mode: "index" }, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { displayColors: false } }, responsive: true, scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 7 } }, y: { beginAtZero: true, grid: { color: "#e2e8f0" } } } },
     type: "bar",
   };
 }
@@ -32,9 +33,9 @@ export function ShowHistogramChart({ series }: HistogramChartProps) {
   return (
     <div className="grid min-w-[760px] gap-5 lg:grid-cols-2">
       {configs.map((config, index) => (
-        <div key={series[index].columnName} className="h-80 rounded-lg border border-blue-100 bg-blue-50/40 p-4 dark:border-slate-800 dark:bg-slate-950">
-          <ShowChartCanvas config={config} />
-        </div>
+        <article key={series[index].columnName} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+          <h3 className="font-semibold text-slate-950 dark:text-white">{series[index].columnName}</h3><p className="mt-1 text-xs text-slate-500">Frequency by value range</p><div className="mt-4 h-72"><ShowChartCanvas config={config} /></div>
+        </article>
       ))}
     </div>
   );

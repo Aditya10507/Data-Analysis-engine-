@@ -6,6 +6,7 @@ import { ShowCleaningReviewPanel } from "./CleaningReviewPanel";
 import { ShowJobFailurePanel } from "./JobFailurePanel";
 import { ShowUploadErrorMessage } from "./UploadErrorMessage";
 import { ShowUploadPipelineSteps } from "./UploadPipelineSteps";
+import { ShowUploadSuccessPanel } from "./UploadSuccessPanel";
 const ACTIVE_STATUSES = new Set(["uploading", "queued", "reviewing", "processing"]);
 
 /** Build and return a drop zone class name. */
@@ -43,13 +44,13 @@ function renderProgress(upload: FileUploadController): ReactElement | null {
 /** Show and return the upload action button. */
 function renderUploadButton(upload: FileUploadController): ReactElement {
   const isProcessing = ACTIVE_STATUSES.has(upload.status);
-  const buttonLabel = upload.status === "reviewing" ? "Review required" : upload.status === "failed" ? "Retry upload" : "Upload";
+  const buttonLabel = upload.status === "done" ? "Analysis complete" : upload.status === "reviewing" ? "Review required" : upload.status === "failed" ? "Retry upload" : "Upload and analyse";
 
   return (
     <button
       className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-950"
       type="button"
-      disabled={!upload.uploadedFile || isProcessing}
+      disabled={!upload.uploadedFile || isProcessing || upload.status === "done"}
       onClick={() => void upload.startUpload()}
     >
       {isProcessing ? <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
@@ -130,6 +131,7 @@ export function ShowFileUploadDropzone() {
     <div className="space-y-5">
       {renderDropZone(upload)}
       {renderProgress(upload)}
+      {upload.status === "done" ? <ShowUploadSuccessPanel /> : null}
       {cleaningReview && jobId ? <ShowCleaningReviewPanel jobId={jobId} review={cleaningReview} /> : null}
       {upload.errorMessage ? <ShowUploadErrorMessage errorMessage={upload.errorMessage} /> : null}
       {jobErrorMessage ? (

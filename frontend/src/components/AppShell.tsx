@@ -35,7 +35,7 @@ export function ShowAppShell() {
         <ShowSidebarNav isOpen={isWorkspaceOpen} onClose={() => setIsWorkspaceOpen(false)} />
         <div className="flex min-h-screen min-w-0 flex-col">
           <ShowTopHeader onWorkspaceClick={() => setIsWorkspaceOpen(true)} />
-          <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{renderCurrentPage(activeView)}</main>
+          <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 py-8 sm:px-6 lg:px-10">{renderCurrentPage(activeView)}</main>
         </div>
         {activeView === "dashboard" && jobResult ? <ShowReportAssistantCard jobResult={jobResult} /> : null}
       </div>
