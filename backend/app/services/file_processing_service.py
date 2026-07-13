@@ -1,4 +1,6 @@
 import logging
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Any
 
 import pandas as pd
@@ -11,13 +13,13 @@ from app.models.job_repository import fetch_job_record, update_job_record
 from app.services.analysis_engine import analyze_dataframe
 from app.services.chart_generator import generate_chart_specs
 from app.services.cleaning_service import clean_and_save_dataframe
-from app.services.dataframe_reader_service import parse_dataframe
+from app.services.dataframe_reader_service import parse_dataframe_path
 from app.services.insight_context_service import build_insight_context
 from app.services.insight_service import generate_insights
 from app.services.redis_cache_service import invalidate_job_cache_sync, set_cached_job_result_sync
 from app.services.report_version_service import save_completed_report_version
 from app.services.response_builder import build_job_response
-from app.services.storage_service import build_object_name, read_object_bytes
+from app.services.storage_service import build_object_name, download_object_file
 
 PROCESSING_STATUS = JobStatus.processing
 DONE_STATUS = JobStatus.done
@@ -72,10 +74,12 @@ def read_cleaning_options(job: Job) -> dict[str, bool]:
 
 
 def read_job_dataframe(job: Job) -> pd.DataFrame:
-    """Read a job's raw file from MinIO and return a DataFrame."""
+    """Download and parse a job file without retaining raw bytes in memory."""
     object_name = build_object_name(str(job.id), job.filename)
-    file_bytes = read_object_bytes(object_name)
-    return parse_dataframe(job.filename, file_bytes)
+    with TemporaryDirectory() as temporary_directory:
+        file_path = str(Path(temporary_directory) / Path(job.filename).name)
+        download_object_file(object_name, file_path)
+        return parse_dataframe_path(job.filename, file_path)
 
 
 def build_partial_result(job: Job) -> dict[str, Any]:

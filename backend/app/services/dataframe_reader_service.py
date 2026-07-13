@@ -70,3 +70,25 @@ def validate_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
         raise ValueError("Uploaded file did not contain any rows.")
 
     return dataframe
+
+
+def parse_dataframe_path(filename: str, file_path: str) -> pd.DataFrame:
+    """Parse a local dataset file and return a validated DataFrame."""
+    extension = PurePath(filename).suffix.lower()
+    parser = get_path_parser(extension)
+    return validate_dataframe(parser(file_path))
+
+
+def get_path_parser(extension: str) -> Callable[[str], pd.DataFrame]:
+    """Get and return a local-file parser for a supported extension."""
+    parsers = {
+        CSV_EXTENSION: lambda path: pd.read_csv(path),
+        JSON_EXTENSION: lambda path: pd.read_json(path),
+        TSV_EXTENSION: lambda path: pd.read_csv(path, sep="\t"),
+        TXT_EXTENSION: lambda path: pd.read_csv(path, sep=None, engine="python"),
+        XLS_EXTENSION: lambda path: pd.read_excel(path),
+        XLSX_EXTENSION: lambda path: pd.read_excel(path),
+    }
+    if extension not in parsers:
+        raise ValueError("Unsupported file type for processing.")
+    return parsers[extension]

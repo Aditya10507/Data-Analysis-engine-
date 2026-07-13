@@ -1,12 +1,13 @@
 import re
 from dataclasses import dataclass
-from io import StringIO
+from tempfile import TemporaryDirectory
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
 
 from app.services.analysis_semantics import is_date_column, is_numeric_column
-from app.services.storage_service import build_cleaned_object_name, save_object_bytes
+from app.services.storage_service import build_cleaned_object_name, save_object_file
 
 OUTLIER_STD_MULTIPLIER = 3
 CleaningOptions = dict[str, bool]
@@ -128,10 +129,11 @@ def clip_column_outliers(series: pd.Series, column_name: str, report: dict[str, 
 
 def save_cleaned_dataframe(job_id: str, dataframe: pd.DataFrame) -> str:
     """Save cleaned DataFrame as CSV to MinIO and return object key."""
-    csv_buffer = StringIO()
-    dataframe.to_csv(csv_buffer, index=False)
     object_name = build_cleaned_object_name(job_id)
-    return save_object_bytes(object_name, csv_buffer.getvalue().encode("utf-8"))
+    with TemporaryDirectory() as temporary_directory:
+        file_path = str(Path(temporary_directory) / "cleaned.csv")
+        dataframe.to_csv(file_path, index=False)
+        return save_object_file(object_name, file_path)
 
 
 def to_snake_case(value: str) -> str:

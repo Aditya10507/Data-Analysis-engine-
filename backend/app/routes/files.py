@@ -49,23 +49,22 @@ async def upload_file(
 ) -> ApiEnvelope[FileUploadResult]:
     """Upload a file and return the created analysis job envelope."""
     try:
-        return await build_upload_response(request, file, db_session)
+        return build_upload_response(request, file, db_session)
     except (UnicodeDecodeError, ValueError) as error:
         raise_bad_upload_request(error)
     except (SQLAlchemyError, S3Error, ValidationError) as error:
         raise_upload_server_error(error)
 
 
-async def build_upload_response(
+def build_upload_response(
     request: Request,
     file: UploadFile,
     db_session: Session,
 ) -> ApiEnvelope[FileUploadResult]:
     """Build and return the upload response envelope."""
     try:
-        file_bytes = await file.read()
         user_id = str(getattr(request.state, "user_id", ""))
-        upload_result = create_upload_job(db_session, file, file_bytes, user_id)
+        upload_result = create_upload_job(db_session, file, user_id)
         return ApiEnvelope(success=True, data=upload_result, error=None)
     except (UnicodeDecodeError, ValueError, SQLAlchemyError, S3Error, ValidationError):
         raise

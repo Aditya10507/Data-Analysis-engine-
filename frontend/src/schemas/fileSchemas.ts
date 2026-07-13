@@ -1,13 +1,15 @@
 import { z } from "zod";
 
 const BYTES_PER_MEGABYTE = 1024 * 1024;
+const MEGABYTES_PER_GIGABYTE = 1024;
 export const ACCEPTED_FILE_FORMATS = "CSV, JSON, TSV, TXT, XLS, and XLSX";
 export const ACCEPTED_EXTENSIONS = [".csv", ".json", ".tsv", ".txt", ".xls", ".xlsx"];
 export const FILE_PICKER_ACCEPT = ".csv,.json,.tsv,.txt,.xls,.xlsx,text/csv,application/json,text/tab-separated-values,text/plain,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-export const MAX_FILE_SIZE_MB = 50;
+export const MAX_FILE_SIZE_MB = MEGABYTES_PER_GIGABYTE;
 export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * BYTES_PER_MEGABYTE;
+export const MAX_FILE_SIZE_LABEL = "1 GB";
 const ACCEPTED_MIME_TYPES = ["text/csv", "application/json", "text/tab-separated-values", "text/plain", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/octet-stream"];
-const FILE_SIZE_ERROR = `File is too large. Upload files must be ${MAX_FILE_SIZE_MB} MB or smaller.`;
+const FILE_SIZE_ERROR = `File is too large. Upload files must be ${MAX_FILE_SIZE_LABEL} or smaller.`;
 const FILE_TYPE_ERROR = `Invalid file type. Accepted formats: ${ACCEPTED_FILE_FORMATS}.`;
 
 const previewCellSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);

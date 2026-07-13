@@ -35,7 +35,7 @@ flowchart LR
 
 ## Product Features
 
-- Multi-format upload: CSV, JSON, TSV, TXT, XLS, and XLSX.
+- Multi-format upload: CSV, JSON, TSV, TXT, XLS, and XLSX files up to 1 GB, streamed directly to MinIO.
 - Cleaning review before analysis: approve or skip null filling, duplicate removal, outlier clipping, and date parsing.
 - Data quality score: backend-generated score, grade, null percentage, duplicate percentage, outlier percentage, and issue list.
 - Interactive dashboard: KPI cards, virtualized preview table, 2D charts, rotatable 3D Plotly charts, D3 correlation heatmap, column drilldown, and smart chart recommendations.
@@ -43,6 +43,13 @@ flowchart LR
 - Saved report versions: every completed analysis stores an immutable report snapshot that can be reopened from the dashboard.
 - Export tools: cleaned CSV download, a business-ready PDF with cover page, executive summary, KPIs, quality score, insights, charts, cleaning log, recommendations, copy insights as markdown, and recent download history.
 - Observability: structured JSON logs shipped to Loki with Grafana dashboards.
+
+### Large Dataset Behavior
+
+- The analysis and cleaning pipeline includes every parsed row and column; there is no application-level row or column cap.
+- The browser receives a virtualized interactive sample instead of the complete dataset payload. This prevents large files from freezing the UI or expanding `jobs.result_json` to hundreds of megabytes.
+- Raw uploads and cleaned CSV artifacts are streamed through temporary files instead of being duplicated as large in-memory byte strings.
+- A 1 GB pandas DataFrame can require several gigabytes of RAM depending on column types. Available machine memory remains a practical processing constraint even though the application does not truncate the analysis.
 
 ## Upload And Analysis Flow
 
@@ -183,7 +190,7 @@ make test
 - If insights fall back, confirm `GROQ_API_KEY` is valid and containers were recreated.
 - If login says session expired, clear browser local storage and reload.
 - If Docker env changes are not picked up, run `docker compose up -d --force-recreate backend celery-worker`.
-- Supported upload types are CSV, JSON, TSV, TXT, XLS, and XLSX.
+- Supported upload types are CSV, JSON, TSV, TXT, XLS, and XLSX up to 1 GB.
 - If old reports show "Not scored yet" or no saved versions, rerun/upload the dataset so the latest pipeline can create those fields.
 
 ## Deployment

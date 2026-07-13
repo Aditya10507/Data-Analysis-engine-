@@ -11,7 +11,7 @@ from app.services.storage_service import (
 )
 
 DOWNLOAD_EXPIRY_SECONDS = 60 * 60
-PREVIEW_ROW_LIMIT = 10000
+INTERACTIVE_SAMPLE_ROWS = 10000
 
 
 def build_job_response(
@@ -82,7 +82,7 @@ def build_download_urls(job: Job) -> dict[str, str]:
 
 def build_preview(dataframe: pd.DataFrame) -> list[dict[str, Any]]:
     """Build and return the first rows as JSON-friendly records."""
-    preview_frame = dataframe.head(PREVIEW_ROW_LIMIT)
+    preview_frame = dataframe.head(INTERACTIVE_SAMPLE_ROWS)
     cleaned_frame = preview_frame.astype(object).where(pd.notna(preview_frame), None)
     return cleaned_frame.map(normalize_preview_value).to_dict("records")
 

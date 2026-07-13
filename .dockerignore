@@ -1,7 +1,13 @@
 *
 !backend/
 !backend/Dockerfile
+!backend/alembic.ini
+!backend/alembic/
+!backend/alembic/**
 !backend/app/
 !backend/app/**
+!backend/pytest.ini
 !backend/requirements.txt
 !backend/requirements-files.txt
+!backend/tests/
+!backend/tests/**

@@ -1,5 +1,6 @@
 from datetime import timedelta
 from io import BytesIO
+from typing import BinaryIO
 from urllib.parse import urlparse
 
 from minio import Minio
@@ -48,6 +49,12 @@ def save_raw_file(job_id: str, filename: str, file_bytes: bytes) -> str:
     return save_object_bytes(object_name, file_bytes)
 
 
+def save_raw_stream(job_id: str, filename: str, file_stream: BinaryIO, file_size: int) -> str:
+    """Stream a raw file to MinIO and return the object key."""
+    object_name = build_object_name(job_id, filename)
+    return save_object_stream(object_name, file_stream, file_size)
+
+
 def save_object_bytes(object_name: str, file_bytes: bytes) -> str:
     """Save object bytes to MinIO and return the object key."""
     settings = get_settings()
@@ -62,6 +69,16 @@ def save_object_bytes(object_name: str, file_bytes: bytes) -> str:
     return object_name
 
 
+def save_object_stream(object_name: str, file_stream: BinaryIO, file_size: int) -> str:
+    """Stream an object to MinIO and return the object key."""
+    settings = get_settings()
+    client = create_minio_client()
+    ensure_bucket_exists(client, settings.s3_bucket)
+    file_stream.seek(0)
+    client.put_object(settings.s3_bucket, object_name, file_stream, length=file_size)
+    return object_name
+
+
 def read_object_bytes(object_name: str) -> bytes:
     """Read object bytes from MinIO and return them."""
     settings = get_settings()
@@ -72,6 +89,23 @@ def read_object_bytes(object_name: str) -> bytes:
     finally:
         response.close()
         response.release_conn()
+
+
+def download_object_file(object_name: str, file_path: str) -> str:
+    """Download a MinIO object to disk and return the local path."""
+    settings = get_settings()
+    client = create_minio_client()
+    client.fget_object(settings.s3_bucket, object_name, file_path)
+    return file_path
+
+
+def save_object_file(object_name: str, file_path: str) -> str:
+    """Upload a local file to MinIO and return the object key."""
+    settings = get_settings()
+    client = create_minio_client()
+    ensure_bucket_exists(client, settings.s3_bucket)
+    client.fput_object(settings.s3_bucket, object_name, file_path)
+    return object_name
 
 
 def create_presigned_get_url(object_name: str, expiry_seconds: int) -> str:

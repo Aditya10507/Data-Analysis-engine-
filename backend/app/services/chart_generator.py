@@ -3,6 +3,7 @@ from io import BytesIO
 from typing import Any
 
 import matplotlib
+import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
@@ -48,8 +49,10 @@ def build_histogram_spec(job_id: str, column_name: str, series: pd.Series) -> di
 
 
 def build_plotly_histogram(column_name: str, series: pd.Series) -> dict[str, Any]:
-    """Build and return a Plotly histogram JSON spec."""
-    figure = go.Figure(data=[go.Histogram(x=series.tolist(), nbinsx=HISTOGRAM_BIN_COUNT)])
+    """Build and return a compact full-column histogram JSON spec."""
+    counts, bin_edges = np.histogram(series.to_numpy(), bins=HISTOGRAM_BIN_COUNT)
+    bin_centers = ((bin_edges[:-1] + bin_edges[1:]) / 2).tolist()
+    figure = go.Figure(data=[go.Bar(x=bin_centers, y=counts.tolist())])
     figure.update_layout(title=f"{column_name} distribution", bargap=0.05)
     return json.loads(figure.to_json())
 
@@ -60,7 +63,7 @@ def save_histogram_thumbnail(job_id: str, column_name: str, series: pd.Series) -
         figsize=(THUMBNAIL_WIDTH_INCHES, THUMBNAIL_HEIGHT_INCHES),
         dpi=THUMBNAIL_DPI,
     )
-    axis.hist(series.tolist(), bins=HISTOGRAM_BIN_COUNT, color="#2563eb")
+    axis.hist(series.to_numpy(), bins=HISTOGRAM_BIN_COUNT, color="#2563eb")
     axis.set_title(column_name, fontsize=8)
     axis.tick_params(axis="both", labelsize=6)
     figure.tight_layout(pad=0.3)

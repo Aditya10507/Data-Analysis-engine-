@@ -25,7 +25,7 @@ function renderMetadata(upload: FileUploadController): ReactElement {
 
   return (
     <span>
-      {upload.filePreview.sizeLabel} / {upload.filePreview.rowCount ?? "server"} preview rows
+      {upload.filePreview.sizeLabel} / {upload.filePreview.rowCount?.toLocaleString() ?? "row count determined during analysis"}
     </span>
   );
 }

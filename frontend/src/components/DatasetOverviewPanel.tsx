@@ -69,7 +69,7 @@ function buildOverviewMetrics(
   return [
     { label: "Rows", value: analysisResult.rowCount.toLocaleString() },
     { label: "Columns", value: analysisResult.columnCount.toLocaleString() },
-    { label: "Preview rows", value: (preview?.rows.length ?? 0).toLocaleString() },
+    { label: "Interactive sample", value: (preview?.rows.length ?? 0).toLocaleString() },
     { label: "Quality grade", value: jobResult?.data_quality?.grade ?? "Pending" },
     { label: "File", value: jobResult?.filename ?? "Uploaded dataset" },
     { label: "Download", value: jobResult?.download_urls.cleaned_csv ? "Cleaned CSV ready" : "Not ready" },

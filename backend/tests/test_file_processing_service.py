@@ -14,7 +14,8 @@ def test_process_job_file_uses_dataframe_pipeline(monkeypatch) -> None:
     monkeypatch.setattr("app.services.file_processing_service.generate_chart_specs", build_charts)
     monkeypatch.setattr("app.services.file_processing_service.generate_insights", build_insights)
     monkeypatch.setattr("app.services.response_builder.create_presigned_get_url", lambda name, expiry: f"http://minio/{name}")
-    result = process_job_file(SimpleNamespace(id="job-123", filename="sales.csv"))
+    job = SimpleNamespace(id="job-123", filename="sales.csv", result_json={})
+    result = process_job_file(job)
     assert result["shape"] == [2, 2]
     assert result["preview"][0]["region"] == "North"
     assert len(result["insights"]) == 1
@@ -25,8 +26,9 @@ def build_stats(dataframe: pd.DataFrame) -> dict:
     return {"columns": {"region": {"dtype": "object"}, "revenue": {"dtype": "int64"}}}
 
 
-def clean_dataframe(job_id: str, dataframe: pd.DataFrame):
+def clean_dataframe(job_id: str, dataframe: pd.DataFrame, options: dict[str, bool]):
     """Return a cleaned DataFrame and report."""
+    assert options == {}
     return dataframe, {"actions": [{"action": "none", "row_count": len(dataframe)}]}
 
 

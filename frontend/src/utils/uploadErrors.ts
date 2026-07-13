@@ -1,5 +1,5 @@
 import { ZodError } from "zod";
-import { ACCEPTED_FILE_FORMATS, MAX_FILE_SIZE_MB } from "../schemas/fileSchemas";
+import { ACCEPTED_FILE_FORMATS, MAX_FILE_SIZE_LABEL } from "../schemas/fileSchemas";
 
 const PARSE_ROW_PATTERN = /row\s+(\d+)/i;
 const PARSE_LINE_PATTERN = /line\s+(\d+)/i;
@@ -35,7 +35,7 @@ export function formatJobFailure(errorMessage: string | null): string {
 
 /** Build and return accepted upload formats copy. */
 export function buildAcceptedFormatsMessage(): string {
-  return `Accepted formats: ${ACCEPTED_FILE_FORMATS}. Maximum file size: ${MAX_FILE_SIZE_MB} MB.`;
+  return `Accepted formats: ${ACCEPTED_FILE_FORMATS}. Maximum file size: ${MAX_FILE_SIZE_LABEL}.`;
 }
 
 /** Check and return whether an error looks like a parse failure. */
